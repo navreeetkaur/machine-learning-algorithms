@@ -11,10 +11,10 @@ dists = {0:"Gaussian", 1:"Binomial", 2:"Bernoulli", 3:"Uniform", 4:"Exponential"
 
 class Bayes:
 	def __init__(self, data, naive = False):
-		self.priors = self.calculate_priors()
 		# last column should be Y
 		self.data = data
 		self.naive = naive
+		self.priors = self.calculate_priors()
 
 
 	# calculates prior of each class
@@ -25,7 +25,7 @@ class Bayes:
 		for i in range(self.data.shape[0]):
 			elem = self.data[i]
 			q = elem[len(elem)-1]
-			if q in priors.keys:
+			if q in priors:
 				priors[q] += 1
 			else:
 				priors[q] = 1
@@ -46,7 +46,7 @@ class Bayes:
 
 
 	# function to predict labels -  to be called from main
-	def fit(self, text_X, distribution = 0):
+	def fit(self, test_X, distribution = 0):
 		# get parameters of likelihood
 		distribution, parameters = self.train(distribution=distribution)
 		# multiply likelihood to priors
@@ -54,11 +54,12 @@ class Bayes:
 		for x in test_X:
 			posteriors = {}
 			for c in self.priors:
-				likelihood = Distributions.guassian(x, parameters[0], parameters[1])
+				likelihood = Distributions.gaussian(x[:-1], parameters[0][c], parameters[1][c])
 				posteriors[c] = likelihood*self.priors[c]
 			# vals = list(self.priors.values())
 			# predicted_class.append(max(vals))
 		# get class with maximum posterior 
+			print(posteriors)
 			predicted_class.append(max(posteriors.items(), key=operator.itemgetter(1))[0])
 		return predicted_class
 
@@ -67,7 +68,8 @@ class Bayes:
 		# probability distribution of x given theta(parameters)
 		# guassian
 		if distribution==0:
-			mu, sigma = Distributions.guassian_mle(self.data, self.naive)
+			mu, sigma = Distributions.gaussian_mle(self.data, self.naive)
+		return mu,sigma
 
 
 

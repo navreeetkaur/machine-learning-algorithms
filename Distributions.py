@@ -4,9 +4,12 @@ import operator as op
 
 # x is a data point
 def gaussian(x, mu, sigma):
-	p = (( maths.fabs(np.linalg.det(sigma)) * ((2*math.pi)**x.shape[1]))**(-0.5)) \
-	* (np.exp( np.matmul(np.matmul(-0.5 * np.transpose(x-mu), np.linalg.inv(sigma)),  (x-mu) )))
-	return p
+	# print(sigma)
+	# print(mu)
+	# print(x)
+	scale = (( math.fabs(np.linalg.det(sigma)) * ((2*math.pi)**x.shape[0]))**(-0.5))
+	exp = (np.exp( np.matmul(np.matmul(-0.5 * np.transpose(x-mu), np.linalg.inv(sigma)),  (x-mu) )))
+	return scale*exp
 
 
 # X is the whole feature vector consisting of ALL data points
@@ -62,46 +65,49 @@ def gaussian_mle(X, naive):
 				if naive:
 					if i==j:
 						sigma[label][i][j] = (sum*1.0)/total_pnts
+						sigma[label][j][i] = sigma[label][i][j]
 					else:
 						sigma[label][i][j] = 0
+						sigma[label][j][i] = sigma[label][i][j]
 				else:
 					sigma[label][i][j] = (sum*1.0)/total_pnts
+					sigma[label][j][i] = sigma[label][i][j]
 
 	return mu, sigma
 
 
 
-def binomial( x, n, p):
-	p = (ncr(n, x))*(p**x)((1-p)**(n-x))
-	return p
+# def binomial( x, n, p):
+# 	p = (ncr(n, x))*(p**x)((1-p)**(n-x))
+# 	return p
 
-def binomial_mle(X):
-	pass
+# def binomial_mle(X):
+# 	pass
 
-def bernoulli( x, p):
-	p = (p**x)*((1-p)**(1-x))
-	return p
-
-
-def uniform( a, b):
-	p = 1//(b-a)
-	return p
+# def bernoulli( x, p):
+# 	p = (p**x)*((1-p)**(1-x))
+# 	return p
 
 
-def exponential( x, lamda):
-	if x < 0:
-		return 0
-	else:
-		p = lamda*(np.exp()**(-1*lamda*))
+# def uniform( a, b):
+# 	p = 1//(b-a)
+# 	return p
 
 
-def poisson( x, lamda):
-	p = (math.exp(-1*lamda)*(lamda**x))/math.factorial(x)
-	return p
+# def exponential( x, lamda):
+# 	if x < 0:
+# 		return 0
+# 	else:
+# 		p = lamda*(np.exp()**(-1*lamda*))
 
 
-def ncr(n, r):
-    r = min(r, n-r)
-    numer = reduce(op.mul, xrange(n, n-r, -1), 1)
-    denom = reduce(op.mul, xrange(1, r+1), 1)
-    return numer/denom
+# def poisson( x, lamda):
+# 	p = (math.exp(-1*lamda)*(lamda**x))/math.factorial(x)
+# 	return p
+
+
+# def ncr(n, r):
+#     r = min(r, n-r)
+#     numer = reduce(op.mul, xrange(n, n-r, -1), 1)
+#     denom = reduce(op.mul, xrange(1, r+1), 1)
+#     return numer/denom

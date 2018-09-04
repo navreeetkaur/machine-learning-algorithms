@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 
+import Bayes
+
 class Classifier:
 	train_test_ratio = 0.8
 	def __init__(self,inputDataFileList,mode):
@@ -70,7 +72,7 @@ class Classifier:
 				i+=1
 
 		# print(train_array)
-		# print(test_array)
+		print(test_array)
 		# print(labels)
 		return train_array,test_array,labels
 
@@ -229,9 +231,9 @@ class Classifier:
 
 				i+=1
 
-			print(train_array)
-			print(test_array)
-			print(labels)
+			# print(train_array)
+			# print(test_array)
+			# print(labels)
 			return train_array,test_array,labels	
 
 
@@ -242,6 +244,8 @@ if __name__ == '__main__':
 	inputDataFile = sys.argv[1]
 	""" Fashion MNIST has separate files for training and test """
 	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway
+
+	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking'}
 
 	if inputDataFile == 'Medical_data.csv':
 		mode = 0
@@ -261,5 +265,11 @@ if __name__ == '__main__':
 		print("Unknown Dataset. Enter valid dataset.")
 		exit()
 
-	classifier = Classifier(inputDataFile,mode)
+	inputDataClass = Classifier(inputDataFile,mode)
+	bayesClassifier = Bayes.Bayes(inputDataClass.Train)
+	predictedClassList = bayesClassifier.fit(inputDataClass.Test)
+	print(predictedClassList)
+
+
+
 
