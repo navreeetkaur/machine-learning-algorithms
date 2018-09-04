@@ -38,10 +38,10 @@ def gaussian_mle(X, naive):
 		# total data points of this class
 		total_pnts = label_features.shape[0]
 		# mu vector for this class
-		mu[label] = np.asarray(label_features.sum(axis = 0))/total_pnts
+		mu[label] = np.asarray(label_features.sum(axis = 0))/(1.0*total_pnts)
 		# subtract mu from each row for sigma computation. . . 
 		for i in range(label_features.shape[0]):
-		    label_features[i] = label_features[i] - mu[label]
+		    sliced_matrix[label][i] = label_features[i] - mu[label]
 
 
 	sigma = {}
@@ -57,9 +57,7 @@ def gaussian_mle(X, naive):
 				sum = 0
 				for k in range(label_features.shape[0]):
 				# multiply
-					if naive and i==j:
-						sum += label_features[k][j]*label_features[k][i]
-					else:
+					if (not naive) or (naive and i==j):
 						sum += label_features[k][j]*label_features[k][i]
 				if naive:
 					if i==j:
