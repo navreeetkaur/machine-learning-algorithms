@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 
-import Bayes
+import Bayes,performanceAnalyser
 
 class Classifier:
 	train_test_ratio = 0.8
@@ -72,7 +72,7 @@ class Classifier:
 				i+=1
 
 		# print(train_array)
-		print(test_array)
+		# print(test_array)
 		# print(labels)
 		return train_array,test_array,labels
 
@@ -266,9 +266,15 @@ if __name__ == '__main__':
 		exit()
 
 	inputDataClass = Classifier(inputDataFile,mode)
-	bayesClassifier = Bayes.Bayes(inputDataClass.Train)
-	predictedClassList = bayesClassifier.fit(inputDataClass.Test)
-	print(predictedClassList)
+	performanceAnalyser = performanceAnalyser.PerformanceCheck()
+	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[])
+	bayesClassifier.train(inputDataClass.Train)
+	Ypred = bayesClassifier.fit(inputDataClass.Test)
+	
+	Ytrue = inputDataClass.Test[:,-1]
+	print(Ytrue)
+	print(Ypred)
+	print(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue))
 
 
 

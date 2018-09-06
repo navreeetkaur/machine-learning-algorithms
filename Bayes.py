@@ -10,20 +10,32 @@ import Distributions
 dists = {0:"Gaussian", 1:"Binomial", 2:"Bernoulli", 3:"Uniform", 4:"Exponential", 5:"Poisson"}
 
 class Bayes:
-	def __init__(self, data, naive = False):
+	def __init__(self, isNaive, distribution=[]):
 		# last column should be Y
-		self.data = data
-		self.naive = naive
-		self.priors = self.calculate_priors()
+		self.priors = []
+		self.isNaive = isNaive
+		self.distribution = distribution
+		self.parameters = []
 
+
+	# algorithm
+	def train(self,data):
+		# assume distribution of ccd - for now assume Gaussian, which is the default
+		# calculate MLE
+		self.calculate_priors(data)
+		# print(self.priors)
+		if not self.isNaive:
+			# Multivariate Gaussian; parameter is of size 1; contains u and sigma dicts
+			self.ml_estimate(data)
+			# print(self.parameters)
 
 	# calculates prior of each class
-	def calculate_priors(self):
-		N = self.data.shape[0]
+	def calculate_priors(self,data):
+		N = data.shape[0]
 		priors = {}
 		# counting the number of instances for each class
-		for i in range(self.data.shape[0]):
-			elem = self.data[i]
+		for i in range(data.shape[0]):
+			elem = data[i]
 			q = elem[len(elem)-1]
 			if q in priors:
 				priors[q] += 1
@@ -32,45 +44,51 @@ class Bayes:
 
 		for key in priors:
 			priors[key] = (priors[key]*1.0)/N
-
-		return priors
-
-			
-	# algorithm
-	def train(self, distribution = 0):
-		# assume distribution of ccd - for now assume Gaussian, which is the default
-		# calculate MLE
-		mu, sigma = self.ml_estimate(distribution)
-		parameters = [mu, sigma]
-		return distribution, parameters
+		self.priors =  priors
 
 
 	# function to predict labels -  to be called from main
-	def fit(self, test_X, distribution = 0):
-		# get parameters of likelihood
-		distribution, parameters = self.train(distribution=distribution)
+	def fit(self, test_X):
 		# multiply likelihood to priors
 		predicted_class = []
+		# print(self.parameters[0])
+		# print(self.parameters[1])
 		for x in test_X:
 			posteriors = {}
 			for c in self.priors:
-				likelihood = Distributions.gaussian(x[:-1], parameters[0][c], parameters[1][c])
-				posteriors[c] = likelihood*self.priors[c]
-			# vals = list(self.priors.values())
-			# predicted_class.append(max(vals))
-		# get class with maximum posterior 
-			print(posteriors)
+				c = int(c)
+				# print(c)
+				if not self.isNaive:
+					likelihood = Distributions.gaussian_multivar(x[:-1], self.parameters[0][0][c], self.parameters[0][1][c])
+					posteriors[c] = likelihood*self.priors[c]
+
 			predicted_class.append(max(posteriors.items(), key=operator.itemgetter(1))[0])
 		return predicted_class
 
 
-	def ml_estimate(self, distribution = 0):
+	def ml_estimate(self,data):
+		# Returns list of parameters for each distribution type; parameter list of length same as distribution
 		# probability distribution of x given theta(parameters)
 		# guassian
-		if distribution==0:
-			mu, sigma = Distributions.gaussian_mle(self.data, self.naive)
-		return mu,sigma
+		n_features = data.shape[1] - 1
+		if not self.isNaive:
+			# Fit a multivariate Gaussian in this case
+			mu, sigma = Distributions.gaussian_multivar_mle(data)
+			self.parameters =  [[mu,sigma]]
+			return
 
+		if len(distribution) != n_features:
+			print("distribution array is not correct")
+			exit()
+
+		# for i in range(len(distribution)):
+		# 	dist = distribution[i]
+
+
+
+
+
+		
 
 
 

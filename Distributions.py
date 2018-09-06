@@ -3,7 +3,7 @@ import math
 import operator as op
 
 # x is a data point
-def gaussian(x, mu, sigma):
+def gaussian_multivar(x, mu, sigma):
 	# print(sigma)
 	# print(mu)
 	# print(x)
@@ -14,7 +14,7 @@ def gaussian(x, mu, sigma):
 
 # X is the whole feature vector consisting of ALL data points
 # returns dictionaries mu, sigma  and list of labels 
-def gaussian_mle(X, naive):
+def gaussian_multivar_mle(X):
 	# if input is both X and Y, make Y as last column of X
 	N = X.shape[0]	
 	# sorting according to Y
@@ -60,18 +60,9 @@ def gaussian_mle(X, naive):
 				sum = 0
 				for k in range(label_features.shape[0]):
 				# multiply
-					if (not naive) or (naive and i==j):
-						sum += label_features[k][j]*label_features[k][i]
-				if naive:
-					if i==j:
-						sigma[label][i][j] = (sum*1.0)/total_pnts
-						sigma[label][j][i] = sigma[label][i][j]
-					else:
-						sigma[label][i][j] = 0
-						sigma[label][j][i] = sigma[label][i][j]
-				else:
-					sigma[label][i][j] = (sum*1.0)/total_pnts
-					sigma[label][j][i] = sigma[label][i][j]
+					sum += label_features[k][j]*label_features[k][i]
+				sigma[label][i][j] = (sum*1.0)/total_pnts
+				sigma[label][j][i] = sigma[label][i][j]
 
 	return mu, sigma
 
