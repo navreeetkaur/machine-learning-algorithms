@@ -37,7 +37,7 @@ class Bayes:
 
 			
 	# algorithm
-	def train(self, distribution = 0):
+	def train(self, distribution = []):
 		# assume distribution of ccd - for now assume Gaussian, which is the default
 		# calculate MLE
 		mu, sigma = self.ml_estimate(distribution)
@@ -46,7 +46,7 @@ class Bayes:
 
 
 	# function to predict labels -  to be called from main
-	def fit(self, test_X, distribution = 0):
+	def fit(self, test_X, distribution = []):
 		# get parameters of likelihood
 		distribution, parameters = self.train(distribution=distribution)
 		# multiply likelihood to priors
@@ -59,15 +59,15 @@ class Bayes:
 			# vals = list(self.priors.values())
 			# predicted_class.append(max(vals))
 		# get class with maximum posterior 
-			print(posteriors)
+			# print(posteriors)
 			predicted_class.append(max(posteriors.items(), key=operator.itemgetter(1))[0])
 		return predicted_class
 
 
-	def ml_estimate(self, distribution = 0):
+	def ml_estimate(self, distribution = []):
 		# probability distribution of x given theta(parameters)
 		# guassian
-		if distribution==0:
+		if distribution==[]:
 			mu, sigma = Distributions.gaussian_mle(self.data, self.naive)
 		return mu,sigma
 
