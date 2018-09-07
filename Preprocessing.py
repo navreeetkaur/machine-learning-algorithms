@@ -31,13 +31,15 @@ class PCA(object):
 
 	def compute_eigen(self):
 		# compute covariance
-		cov_X = np.zeros(shape=(self.X.shape[1], self.X.shape[1]), dtype = np.float)
-		for i in range(self.X.shape[1]):
-			for j in range(i, self.X.shape[1]):
-				sum = 0
-				for k in range(self.X.shape[0]):
-					sum += self.X[k][j]* self.X[k][i]
-				cov_X[i][j] = (sum*1.0)/(self.X.shape[0])
+		# cov_X = np.zeros(shape=(self.X.shape[1], self.X.shape[1]), dtype = np.float)
+		# for i in range(self.X.shape[1]):
+		# 	for j in range(i, self.X.shape[1]):
+		# 		sum = 0
+		# 		for k in range(self.X.shape[0]):
+		# 			sum += self.X[k][j]* self.X[k][i]
+		# 		cov_X[i][j] = (sum*1.0)/(self.X.shape[0])
+		# more efficient way of computing covariance
+		cov_X = (np.matmul(self.X.transpose(), self.X))/(1.0 * X.shape[0])
 
 		# diagonalise covariance matrix to obtain eigenvalues
 		eigvals, eigvecs = np.linalg.eig(cov_X)
