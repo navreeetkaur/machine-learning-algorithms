@@ -4,25 +4,27 @@ import operator as op
 
 # x is a data point
 def gaussian_multivar(x, mu, sigma):
-	# print(sigma)
-	# print(mu)
-	# print(x)
+	# x is a n dimensional vector ; mu is a n dimensional vector; sigma is n*n covariance matrix
 	scale = (( math.fabs(np.linalg.det(sigma)) * ((2*math.pi)**x.shape[0]))**(-0.5))
 	exp = (np.exp( np.matmul(np.matmul(-0.5 * np.transpose(x-mu), np.linalg.inv(sigma)),  (x-mu) )))
+	return scale*exp
+
+def gaussian(x, mu, sigma2):
+	# x is a number; u is a number; sigma2 is a number(variance)
+	scale = math.sqrt((2*math.pi* sigma2))*(-1)
+	exp = np.exp((x-mu)*(1.0/(2*sigma2)))
 	return scale*exp
 
 
 # X is the whole feature vector consisting of ALL data points
 # returns dictionaries mu, sigma  and list of labels 
-def gaussian_multivar_mle(X):
+def gaussian_mle(X):
 	# if input is both X and Y, make Y as last column of X
 	N = X.shape[0]	
 	# sorting according to Y
 	X = X[X[:,X.shape[1]-1].argsort()]
-
 	# slicing matrix acc. to classes
 	sliced_matrix = {}
-
 	x = X[0][len(X[0])-1]
 	last_index = 0
 	for i in range(1, X.shape[0]):
@@ -33,38 +35,23 @@ def gaussian_multivar_mle(X):
 	        last_index = i
 	    x = q
 	sliced_matrix[x] = X[last_index:X.shape[0], :X.shape[1]-1]
-	
-	# parameters for each class 
+
 	mu = {}
-
-	for label, label_features in sliced_matrix.items():
-		# total data points of this class
-		total_pnts = label_features.shape[0]
-		# mu vector for this class
-		mu[label] = np.asarray(label_features.sum(axis = 0))/(1.0*total_pnts)
-		# subtract mu from each row for sigma computation. . . 
-		for i in range(label_features.shape[0]):
-		    sliced_matrix[label][i] = label_features[i] - mu[label]
-
-
 	sigma = {}
-	# for every feature in X
-	for label, label_features in sliced_matrix.items():
-		# total data points of this class
-		total_pnts = label_features.shape[0]
-		sigma[label] = np.zeros(shape=(label_features.shape[1], label_features.shape[1]), dtype = np.float)
-		for i in range(label_features.shape[1]):
-			# for every feature in X starting from ith index
-			for j in range(i, label_features.shape[1]):
-				# for every data point
-				sum = 0
-				for k in range(label_features.shape[0]):
-				# multiply
-					sum += label_features[k][j]*label_features[k][i]
-				sigma[label][i][j] = (sum*1.0)/total_pnts
-				sigma[label][j][i] = sigma[label][i][j]
 
-	return mu, sigma
+	for label in sliced_matrix:
+		# total data points of this class
+		total_pnts = sliced_matrix[label].shape[0]
+		# mu vector for this class
+		mu[label] = np.asarray(sliced_matrix[label].sum(axis = 0))/(1.0*total_pnts)
+		# subtract mu from each row for sigma computation. . . 
+		sliced_matrix[label] = sliced_matrix[label] - mu[label]
+		sigma[label] = np.matmul(sliced_matrix[label].transpose(),sliced_matrix[label])
+		sigma[label] = sigma[label]*1.0/total_pnts	
+
+	return [mu, sigma]
+
+
 
 
 

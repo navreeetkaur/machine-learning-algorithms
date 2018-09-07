@@ -267,11 +267,14 @@ if __name__ == '__main__':
 
 	inputDataClass = Classifier(inputDataFile,mode)
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[])
+	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0,0,0])
 	bayesClassifier.train(inputDataClass.Train)
 	Ypred = bayesClassifier.fit(inputDataClass.Test)
 	
 	Ytrue = inputDataClass.Test[:,-1]
+	# print(inputDataClass.Train)
+	# print(inputDataClass.Test)
+
 	print(Ytrue)
 	print(Ypred)
 	print(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue))

@@ -23,11 +23,15 @@ class Bayes:
 		# assume distribution of ccd - for now assume Gaussian, which is the default
 		# calculate MLE
 		self.calculate_priors(data)
-		# print(self.priors)
 		if not self.isNaive:
 			# Multivariate Gaussian; parameter is of size 1; contains u and sigma dicts
 			self.ml_estimate(data)
-			# print(self.parameters)
+			return
+		if len(self.distribution) != data.shape[1] - 1:
+			print("distribution array is not equal to number of n_features")
+			exit()
+		self.ml_estimate(data)
+
 
 	# calculates prior of each class
 	def calculate_priors(self,data):
@@ -51,16 +55,22 @@ class Bayes:
 	def fit(self, test_X):
 		# multiply likelihood to priors
 		predicted_class = []
-		# print(self.parameters[0])
-		# print(self.parameters[1])
 		for x in test_X:
+			# x = x[:-1]
 			posteriors = {}
 			for c in self.priors:
-				c = int(c)
-				# print(c)
+				# c = int(c)
 				if not self.isNaive:
 					likelihood = Distributions.gaussian_multivar(x[:-1], self.parameters[0][0][c], self.parameters[0][1][c])
-					posteriors[c] = likelihood*self.priors[c]
+				else:
+					likelihood = 1
+					for i in range(len(self.distribution)):
+						di = self.distribution[i]
+						if di == 0:
+							likelihood = likelihood*Distributions.gaussian(x[i],self.parameters[i][0][c][0],self.parameters[i][1][c][0][0]) 
+
+				posteriors[c] = likelihood*self.priors[c]
+
 
 			predicted_class.append(max(posteriors.items(), key=operator.itemgetter(1))[0])
 		return predicted_class
@@ -73,27 +83,11 @@ class Bayes:
 		n_features = data.shape[1] - 1
 		if not self.isNaive:
 			# Fit a multivariate Gaussian in this case
-			mu, sigma = Distributions.gaussian_multivar_mle(data)
-			self.parameters =  [[mu,sigma]]
+			self.parameters.append(Distributions.gaussian_mle(data))
 			return
-
-		if len(distribution) != n_features:
-			print("distribution array is not correct")
-			exit()
-
-		# for i in range(len(distribution)):
-		# 	dist = distribution[i]
-
-
-
-
-
-		
-
-
-
-
-
-
-
-		
+		for i in range(len(self.distribution)):
+			di = self.distribution[i]
+			if di == 0:
+				X = np.vstack((data[:,i],data[:,-1]))
+				X = X.transpose()
+				self.parameters.append(Distributions.gaussian_mle(X))
