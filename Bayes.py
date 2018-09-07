@@ -28,7 +28,7 @@ class Bayes:
 			self.ml_estimate(data)
 			return
 		if len(self.distribution) != data.shape[1] - 1:
-			print("distribution array is not equal to number of n_features")
+			print("distribution array is not equal to number of n_features = "+str(data.shape[1]-1))
 			exit()
 		self.ml_estimate(data)
 

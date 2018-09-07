@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
 	inputDataClass = Classifier(inputDataFile,mode)
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0,0,0])
+	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0,0,0,0,0,0])
 	bayesClassifier.train(inputDataClass.Train)
 	Ypred = bayesClassifier.fit(inputDataClass.Test)
 	
