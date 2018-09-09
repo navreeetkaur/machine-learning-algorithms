@@ -1,7 +1,9 @@
 import numpy as np
 import sys
 
-import Bayes,performanceAnalyser
+import Bayes,performanceAnalyser, Preprocessing, kmeans
+
+dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
 class Classifier:
 	train_test_ratio = 0.8
@@ -78,7 +80,7 @@ class Classifier:
 
 
 	def collectInputFashion(self,inputDataFileList):
-		print(inputDataFileList)
+		# print(inputDataFileList)
 		# Loading training data
 		labels = ['pixel'+str(i+1) for i in range(784) ]
 		labels.append('Class')
@@ -266,18 +268,44 @@ if __name__ == '__main__':
 		exit()
 
 	inputDataClass = Classifier(inputDataFile,mode)
+
+	if mode == 1:
+		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], retain_var = 0.85)
+		reduced_train = pca.reduce(inputDataClass.Train[:,:-1])
+		# print(reduced_train[:10,:])
+		inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
+		print("train_data reduced. YAYAYAYA")
+		print("Train data reduced to columns = "+str(reduced_train.shape[1]))
+		reduced_test = pca.reduce(inputDataClass.Test[:,:-1])
+		inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
+		print("test_data reduced. YAYAYAYA")
+		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
+
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0,0,0,0,0,0])
-	bayesClassifier.train(inputDataClass.Train)
-	Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	# bayesClassifier.train(inputDataClass.Train)
+	# print("Training of model done. YAYAYYA")
+	# Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# print("Prediction done. YAYAYYA")
+
+	# Kmeans = kmeans.k_means(3,inputDataClass.Train[:,:-1])
+	# Kmeans.apply()
+	k = 3
+	labels, means, rms = kmeans.kfit(inputDataClass.Train[:,:-1],k)
+
+	print("Kmeans done")
+
+	kmeans.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
+	print("Kmeans visualized")
 	
-	Ytrue = inputDataClass.Test[:,-1]
+	# Ytrue = inputDataClass.Test[:,-1]
 	# print(inputDataClass.Train)
 	# print(inputDataClass.Test)
 
-	print(Ytrue)
-	print(Ypred)
-	print(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue))
+	# print(Ytrue)
+	# print(Ypred)
+	# print(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue))
 
 
 

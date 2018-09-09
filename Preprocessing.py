@@ -8,13 +8,15 @@ class PCA(object):
 		self.retain_var = retain_var
 		self.whiten = whiten
 		self.regularization = regularization
-		self.X = self.scale(data)
-		self.U = self.compute_eigen()
 		self.scale_mean = 0
 		self.scale_sigma = 0
+		self.X = self.scale(data)
+		self.U = self.compute_eigen()
+		
 
 	# feature scaling by Z-scoring 
 	def scale(self, X):
+		print("Need for scale")
 		d = X.shape[1] 
 		n = X.shape[0]
 		means = X.sum(axis=0)/(1.0*n)
@@ -22,11 +24,13 @@ class PCA(object):
 		# data with zero mean
 		X = X - means
 		# variance of each feature
-		Y = X**2
+		Y = np.square(X)
 		Y = np.sqrt((Y.sum(axis=0))/(1.0*n))
 		self.scale_sigma = Y
 		# scaled data with zero mean and variance one
-		X = X/Y
+		X = np.divide(X,Y)
+		# print(means, self.mean)
+		# print(self.scale_sigma[:10],Y[:10])
 		return X
 
 	def compute_eigen(self):
@@ -39,15 +43,17 @@ class PCA(object):
 		# 			sum += self.X[k][j]* self.X[k][i]
 		# 		cov_X[i][j] = (sum*1.0)/(self.X.shape[0])
 		# more efficient way of computing covariance
-		cov_X = (np.matmul(self.X.transpose(), self.X))/(1.0 * X.shape[0])
+		cov_X = (np.matmul(self.X.transpose(), self.X))/(1.0 * self.X.shape[0])
+		print("covariance computed. YAYAY")
 
 		# diagonalise covariance matrix to obtain eigenvalues
 		eigvals, eigvecs = np.linalg.eig(cov_X)
 
 		# sort eigenvalues in decreasing order and obtain corresponding eigenvectors
 		eigvals, eigvecs = zip(*sorted(zip(eigvals, eigvecs), reverse=True))
-		eigvals = list(eigvals)
-		eigvecs = list(eigvecs)
+		eigvals = np.asarray(eigvals)
+		eigvecs = np.asarray(eigvecs)
+		print("Eigenvalues and vectors computed. YAYAY")
 
 		# choose top k eigenvectors to form U - top k is determined by retaining 95% variance
 		sum_n_eigvals = eigvals.sum()
@@ -59,14 +65,18 @@ class PCA(object):
 				break
 
 		U = eigvecs[:][:k+1] # (k x d)
+		print("U computed. YAYAY")
 		return U
 
 
 	def reduce(self, X):
 		# scale X with previous parameters
-		X = (X - self.scale_mean)/(1.0*self.scale_sigma)
+		print("Starting to reduce")
+		# print(self.scale_sigma)
+		X = np.divide((X - self.scale_mean),(1.0*self.scale_sigma))
 		# obtain Z i.e. dimensionaly reduced feature matrix; Z = U transpose[k x d] * X[d x n]
 		Z = np.matmul(self.U, X.transpose()).transpose() # ((k x d) * (d x n)) = (n x k)
+		print("Z computed. YYAYA")
 		if self.whiten:
 			W = whitening(Z)
 			return W

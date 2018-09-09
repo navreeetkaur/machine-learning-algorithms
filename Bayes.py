@@ -7,7 +7,6 @@ import Distributions
 
 
 # global var for distributions
-dists = {0:"Gaussian", 1:"Binomial", 2:"Bernoulli", 3:"Uniform", 4:"Exponential", 5:"Poisson"}
 
 class Bayes:
 	def __init__(self, isNaive, distribution=[]):
@@ -54,6 +53,8 @@ class Bayes:
 	# function to predict labels -  to be called from main
 	def fit(self, test_X):
 		# multiply likelihood to priors
+		print(len(self.parameters))
+		print(self.parameters)
 		predicted_class = []
 		for x in test_X:
 			# x = x[:-1]
@@ -68,6 +69,10 @@ class Bayes:
 						di = self.distribution[i]
 						if di == 0:
 							likelihood = likelihood*Distributions.gaussian(x[i],self.parameters[i][0][c][0],self.parameters[i][1][c][0][0]) 
+						elif di == 1:
+							likelihood = likelihood*self.parameters[i][c][x[i]]
+						elif di == -1:
+							continue
 
 				posteriors[c] = likelihood*self.priors[c]
 
@@ -86,8 +91,12 @@ class Bayes:
 			self.parameters.append(Distributions.gaussian_mle(data))
 			return
 		for i in range(len(self.distribution)):
+			X = np.vstack((data[:,i],data[:,-1]))
+			X = X.transpose()
 			di = self.distribution[i]
 			if di == 0:
-				X = np.vstack((data[:,i],data[:,-1]))
-				X = X.transpose()
 				self.parameters.append(Distributions.gaussian_mle(X))
+			elif di ==1:
+				self.parameters.append(Distributions.multinomial_mle(X))
+			elif di == -1:
+				self.parameters.append(-1)

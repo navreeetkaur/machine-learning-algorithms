@@ -1,5 +1,14 @@
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+
+# from classifier, take classifier.Train[:,-1]
+# Use the labels dict that k means return to select only those indices from y corrosponding to one cluster
+# use np unique (return counts) to find the majority element and assign it the class label
+# Do checks that the majority is at least 50%
+# Also, check that every majority label  is different
+
 class k_means:
 	def __init__(self,k,inputs):
 		self.k = k
@@ -99,9 +108,6 @@ class k_means:
 		while(b and counter<=1000000):
 			self.allocation()
 			b = self.update()
-		self.printlabels()
-		self.printmeans()
-		print(self.rms())
 
 	def find(self, i): 
 		for j in range(0, self.k):
@@ -111,13 +117,21 @@ class k_means:
 
 	def rms(self):
 		dis = 0
-		print("**")
+		#print("**")
 		for i in range(0,len(self.input)):
 			a = self.find(i)
-			print(a)
+			#print(a)
 			dis+=self.distance(self.input[i],self.means_arr[a])
-		print("**")
+		#print("**")
 		return dis
+
+	def print(self):
+		self.printmeans()
+		self.printlabels()
+		self.printrms()
+
+	def printrms(self):
+		print(self.rms())
 
 
 def main():
@@ -130,3 +144,47 @@ def main():
 if __name__=="__main__":
 	main()
 
+def kfit(arr,k,num_runs = 100):
+	rms  = len(arr)*(len(arr[0]))
+	min_arr = np.zeros((k, len(arr[0])))
+	dic = {}
+	for alpha in range(num_runs):
+		experiment = k_means(k, arr)
+		experiment.apply()
+		if(rms > experiment.rms()):
+			rms = experiment.rms()
+			dic = experiment.labels
+			min_arr = experiment.means_arr
+	# print(rms)
+	return experiment.labels, experiment.means_arr, rms
+
+def visualizeKMeans(data,labelDict,k):
+	colors = ("red", "green", "blue")
+	groups = ("HEALTHY", "MEDICATION", "SURGERY") 
+	groupedData = []
+	for label in labelDict:
+		indices = labelDict[label]
+		groupedData.append(data[indices,:].transpose())
+
+	fig = plt.figure()
+	ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
+	ax = fig.gca(projection='3d')
+
+	for d, c, g in zip(groupedData, colors, groups):
+		x, y, z = d
+		ax.scatter(x, y, z, alpha=0.8, c=c, edgecolors='none', s=30, label=g)
+	 
+
+	plt.title('Matplot 3d scatter plot')
+	plt.legend(loc=2)
+	plt.show()
+
+# self.normalise()
+# 		self.init_guess()
+# 		b = True
+# 		counter = 0
+# 		while(b and counter<=1000000):
+# 			self.allocation()
+# 			b = self.update()
+# 		self.printlabels()
+# 		self.printmeans()

@@ -5,7 +5,10 @@ import operator as op
 # x is a data point
 def gaussian_multivar(x, mu, sigma):
 	# x is a n dimensional vector ; mu is a n dimensional vector; sigma is n*n covariance matrix
-	scale = (( math.fabs(np.linalg.det(sigma)) * ((2*math.pi)**x.shape[0]))**(-0.5))
+	detSig = np.linalg.det(sigma)
+	if detSig == 0:
+		return 0
+	scale = (( math.fabs(detSig) * ((2*math.pi)**x.shape[0]))**(-0.5))
 	exp = (np.exp( np.matmul(np.matmul(-0.5 * np.transpose(x-mu), np.linalg.inv(sigma)),  (x-mu) )))
 	return scale*exp
 
@@ -28,12 +31,12 @@ def gaussian_mle(X):
 	x = X[0][len(X[0])-1]
 	last_index = 0
 	for i in range(1, X.shape[0]):
-	    elem = X[i]
-	    q = elem[len(elem)-1]
-	    if q!= x:
-	        sliced_matrix[x] = X[last_index:i, :X.shape[1]-1]
-	        last_index = i
-	    x = q
+		elem = X[i]
+		q = elem[len(elem)-1]
+		if q!= x:
+			sliced_matrix[x] = X[last_index:i, :X.shape[1]-1]
+			last_index = i
+		x = q
 	sliced_matrix[x] = X[last_index:X.shape[0], :X.shape[1]-1]
 
 	mu = {}
@@ -51,9 +54,35 @@ def gaussian_mle(X):
 
 	return [mu, sigma]
 
+def multinomial_mle(X):
+	# X is a n*2 array with econd column as classes
+	N = X.shape[0]	
+	# sorting according to Y
+	X = X[X[:,X.shape[1]-1].argsort()]
+	# slicing matrix acc. to classes
+	sliced_matrix = {}
+	x = X[0][len(X[0])-1]
+	last_index = 0
+	for i in range(1, X.shape[0]):
+		elem = X[i]
+		q = elem[len(elem)-1]
+		if q!= x:
+			sliced_matrix[x] = X[last_index:i, :X.shape[1]-1]
+			last_index = i
+		x = q
+	sliced_matrix[x] = X[last_index:X.shape[0], :X.shape[1]-1]
+	
+	dictOfPtables ={}
+	# keys are class labels
 
+	for label in sliced_matrix:
+		features = sliced_matrix[label]
+		unique, counts = np.unique(features, return_counts=True)
+		counts = (counts*1.0)/len(features)
+		pTable = dict(zip(unique, counts))
+		dictOfPtables[label] = pTable
 
-
+	return dictOfPtables
 
 # def binomial( x, n, p):
 # 	p = (ncr(n, x))*(p**x)((1-p)**(n-x))
