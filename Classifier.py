@@ -2,12 +2,14 @@ import numpy as np
 import sys
 
 import Bayes,performanceAnalyser, Preprocessing
-# import kmeans
+import kmeans
+import KNN
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
 class Classifier:
 	train_test_ratio = 0.8
+	# train_test_ratio = 1.0
 	def __init__(self,inputDataFileList,mode):
 		self.mode = mode
 		if mode == 0:
@@ -271,7 +273,7 @@ if __name__ == '__main__':
 	inputDataClass = Classifier(inputDataFile,mode)
 
 	if mode == 1:
-		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], retain_var = 0.85)
+		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], retain_var = 0.85)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1])
 		inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
 		print("train_data reduced. YAYAYAYA")
@@ -282,35 +284,55 @@ if __name__ == '__main__':
 		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
+
+
+	"""################################# Bayes Classifier #############################################"""
 	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	bayesClassifier.train(inputDataClass.Train)
-	print("Training of model done. YAYAYYA")
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	# bayesClassifier.train(inputDataClass.Train)
+	# print("Training of model done. YAYAYYA")
 
-	Ypred = bayesClassifier.fit(inputDataClass.Train)
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = bayesClassifier.fit(inputDataClass.Train)
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	Ypred = bayesClassifier.fit(inputDataClass.Test)
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	print("Prediction done. YAYAYYA")
-	# Kmeans = kmeans.k_means(3,inputDataClass.Train[:,:-1])
-	# Kmeans.apply()
-	# k = 3
-	# labels, means, rms = kmeans.kfit(inputDataClass.Train[:,:-1],k)
+	# print("Prediction done. YAYAYYA")
+	"""##############################################################################"""
 
+
+
+	"""################################# KMEANS #############################################"""
+
+	# k = 3						### Hyperparameter ###
+	# labels, means, rms = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],num_runs = 100)
+	# print(rms)
 	# print("Kmeans done")
 
 	# kmeans.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
 	# print("Kmeans visualized")
-	
-	# print(inputDataClass.Train)
-	# print(inputDataClass.Test)
 
+	"""##############################################################################"""
+
+
+	"""################################# KNN #############################################"""
+
+	nearestNeighbours = 10		### Hyperparameter ###
+	knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1])
+	knn.allocate()
+	Ypred = knn.labels
+	Ytrue = inputDataClass.Test[:,-1]
 	# print(Ytrue)
 	# print(Ypred)
+
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	"""###################################################################################"""
+
+	
 
 
 
