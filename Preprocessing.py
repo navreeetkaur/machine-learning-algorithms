@@ -21,6 +21,8 @@ class Normalise(object):
 			X = X - means
 			# variance of each feature
 			Y = np.square(X)
+			# to account for zero variance
+			Y = np.add(Y, self.regularization)
 			Y = np.sqrt((Y.sum(axis=0))/(1.0*n))
 			self.scale_sigma = Y
 			# scaled data with zero mean and variance one
@@ -44,9 +46,8 @@ class PCA(object):
 		self.scale_sigma = 0
 		self.X = self.scale(data)
 		self.U = self.compute_eigen()
+		self.x_rot = 0
 		self.W = 0
-		# self.mean_Z = 0
-		# self.var_Z = 0
 		self.eigvecs = 0
 		self.eigvals = 0
 		self.k = 0
@@ -63,24 +64,16 @@ class PCA(object):
 		X = X - means
 		# variance of each feature
 		Y = np.square(X)
+		# to account for zero variance
+		Y = np.add(Y, self.regularization)
 		Y = np.sqrt((Y.sum(axis=0))/(1.0*n))
 		self.scale_sigma = Y
 		# scaled data with zero mean and variance one
-		X = np.divide(X,Y)
-		# print(means, self.mean)
-		# print(self.scale_sigma[:10],Y[:10])
+		X = np.divide(X, Y, out=np.zeros_like(X), where=Y!=0)
 		return X
 
+
 	def compute_eigen(self):
-		# compute covariance
-		# cov_X = np.zeros(shape=(self.X.shape[1], self.X.shape[1]), dtype = np.float)
-		# for i in range(self.X.shape[1]):
-		# 	for j in range(i, self.X.shape[1]):
-		# 		sum = 0
-		# 		for k in range(self.X.shape[0]):
-		# 			sum += self.X[k][j]* self.X[k][i]
-		# 		cov_X[i][j] = (sum*1.0)/(self.X.shape[0])
-		# more efficient way of computing covariance
 		cov_X = (np.matmul(self.X.transpose(), self.X))/(1.0 * self.X.shape[0])
 		print("covariance computed. YAYAY")
 
@@ -88,11 +81,9 @@ class PCA(object):
 		eigvals, eigvecs = np.linalg.eig(cov_X)
 
 		# sort eigenvalues in decreasing order and obtain corresponding eigenvectors
-		eigvals, eigvecs = zip(*sorted(zip(eigvals, eigvecs), reverse=True))
-		self.eigvals = eigvals
-		self.eigvecs = eigvecs
-		eigvals = np.asarray(eigvals)
-		eigvecs = np.asarray(eigvecs)
+		eig_sort = eigvals.argsort()
+		eigvals = eigvals[eig_sort[::-1]]
+		eigvecs = eigvecs[eig_sort[::-1]]
 		print("Eigenvalues and vectors computed. YAYAY")
 
 		# choose top k eigenvectors to form U - top k is determined by retaining 95% variance
@@ -106,65 +97,60 @@ class PCA(object):
 
 		#U = eigvecs[:][:k+1] # (k x d)
 		self.k = k
+		# rotated version of X in the space with eigenvector basis
+		self.x_rot = np.matmul(U.transpose(), self.X.transpose()).transpose() # (d x d, d x n).T  -> n x d
+		print("x_rot. YAYAY")
 		print("U computed. YAYAY")
+		# U is the matrix of column eigenvectors in descending order of their corresponding eigenvalues
 		return U
 
 
-	def reduce(self, X):
-		print("Starting to reduce")
-		# scale X with previous parameters
-		X = np.divide((X - self.scale_mean),(1.0*self.scale_sigma))
+	def reduce(self, X, train):
+		if train:
+			print("Starting to reduce training data")
+			if self.whiten:
+				self.cov_x_rot = (np.matmul(self.x_rot.transpose(), self.x_rot))/(1.0 * self.x_rot.shape[0])
+				self.W = np.add(self.cov_x_rot.diagonal(), self.regularization)**(0.5)
+				# Z = np.divide(x_rot, self.W, out = np.zeros_like(x_rot), where=self.W!=0)
+				Z = np.divide(self.x_rot, self.W)
+			else:
+				Z = self.x_rot
 
+		else:
+			print("Starting to reduce testing data")		
+			# scale X with previous parameters
+			X = np.divide((X - self.scale_mean),(1.0*self.scale_sigma))
+			# rotate X
+			x_rot =  np.matmul(self.U.transpose(), X.transpose()).transpose()
+			if self.whiten:
+				Z = np.divide(x_rot, self.W)
+			else:
+				Z = x_rot
+
+		return Z[:,:self.k]
+		
+
+	def retrieve(self, X):
+		# getting X back
 		if self.whiten:
-			self.W = np.add(self.eigvals, self.regularization)**(-0.5)
+			x_rot = np.multiply(self.W[:k], X) # n x k
 		else:
-			self.W = np.array(X.shape[1])
-		Z = np.multiply(self.W, (np.matmul(self.U, X.transpose()))).transpose() # n x d
+			x_rot = X # n x k
 
-		return Z[:][:k+1]
-
-		# obtain Z i.e. dimensionaly reduced feature matrix; Z = U transpose[k x d] * X[d x n]
-		# Z = np.matmul(self.U, X.transpose()).transpose() # ((k x d) * (d x n)) = (n x k)
-		# print("Z computed. YYAYA")
-		# if self.whiten:
-		# 	W = whitening(Z)
-		# 	return W
-		# else:
-		# 	return Z
-		
-		
-	def whitening(self, Z):
-		# Whitening(optional) -  divide each feature by variance of that feature
-		# regularisation added so that very small values do not blow up W 
-		# W = np.multiply(Z, np.add(self.eigvals, self.regularization)**(-0.5))
-		mean_Z = Z.sum(axis=0)/(1.0*Z.shape[0])
-		self.zeromean_Z = Z - mean_Z
-		cov_Z = (np.matmul(self.zeromean_Z.transpose(), self.zeromean_Z))/(1.0 * Z.shape[0])
-		# regularisation added so that very small values do not blow up W 
-		self.var_Z = np.sqrt(cov_Z.diagonal() + self.regularization)
-		W = np.divide(Z, self.var_Z)
-		return W
+		# un-rotate
+		X = np.matmul(self.U[:,:k], x_rot.transpose()).transpose()  # n x k
+		# un-scale
+		X = np.multiply(X, self.scale_sigma)
+		X = np.add(X, self.scale_mean)
 
 
-	def retrieve(self, Z):
-		# to recover the original data
-		if not whiten:
-			recover_X = np.matmul(Z, self.U[:][:k+1])
-			recover_X = np.multiply(recover_X, self.scale_sigma)
-			recover_X = np.add(recover_X, self.scale_mean)
-		else:
-			recover_X = np.multiply(Z, (self.W)**(-1))
-			recover_X = np.matmul(recover_X, self.U[:][:k+1])
-			recover_X = np.multiply(recover_X, self.scale_sigma)
-			recover_X = np.add(recover_X, self.scale_mean)
 
-		# if not whiten:
-		# 	recover_X = np.matmul(self.U.transpose(), Z.transpose()).transpose()
-		# else:
-		# 	# elementwise multiplication by variance of each feature
-		# 	recover_Z = np.multiply(Z, self.var_Z)
-		# 	# multiply by sigma, plus means  
-		# 	recover_Z = np.multiply()
-		# 	# recover_Z = 
-		# 	recover_X = np.matmul(self.U.transpose(), recover_Z.transpose()).transpose()
-		# return recover_X
+
+
+
+
+	
+
+
+
+
