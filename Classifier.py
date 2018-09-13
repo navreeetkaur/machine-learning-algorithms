@@ -4,6 +4,7 @@ import sys
 import Bayes,performanceAnalyser, Preprocessing
 import kmeans
 import KNN
+import Visualization
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
@@ -284,23 +285,31 @@ if __name__ == '__main__':
 		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-
+	# Visualization.visualizeData(np.vstack((inputDataClass.Train,inputDataClass.Test)))
 
 	"""################################# Bayes Classifier #############################################"""
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
 	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	# bayesClassifier.train(inputDataClass.Train)
-	# print("Training of model done. YAYAYYA")
+	bayesClassifier.train(inputDataClass.Train)
+	print("Training of model done. YAYAYYA")
 
-	# Ypred = bayesClassifier.fit(inputDataClass.Train)
-	# Ytrue = inputDataClass.Train[:,-1]
-	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = bayesClassifier.fit(inputDataClass.Train)
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# Ypred = bayesClassifier.fit(inputDataClass.Test)
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = bayesClassifier.fit(inputDataClass.Test)
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# print("Prediction done. YAYAYYA")
+	precision,recall = performanceAnalyser.goodness(Ytrue,Ypred)
+
+	print("Precision")
+	print(precision)
+	print("Recall")
+	print(recall)
+
+
+	print("Prediction done. YAYAYYA")
 	"""##############################################################################"""
 
 
@@ -320,15 +329,15 @@ if __name__ == '__main__':
 
 	"""################################# KNN #############################################"""
 
-	nearestNeighbours = 10		### Hyperparameter ###
-	knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1])
-	knn.allocate()
-	Ypred = knn.labels
-	Ytrue = inputDataClass.Test[:,-1]
-	# print(Ytrue)
-	# print(Ypred)
+	# nearestNeighbours = 10		### Hyperparameter ###
+	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1])
+	# knn.allocate()
+	# Ypred = knn.labels
+	# Ytrue = inputDataClass.Test[:,-1]
+	# # print(Ytrue)
+	# # print(Ypred)
 
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 	"""###################################################################################"""
 
