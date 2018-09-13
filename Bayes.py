@@ -53,8 +53,13 @@ class Bayes:
 	# function to predict labels -  to be called from main
 	def fit(self, test_X):
 		# multiply likelihood to priors
-		print(len(self.parameters))
-		print(self.parameters)
+		# print(len(self.parameters))
+		# print(self.parameters[0])
+		# print(self.parameters[1])
+		# print(self.parameters[2])
+		# print(self.parameters[3])
+		# print(self.parameters[4])
+		# print(self.parameters[5])
 		predicted_class = []
 		for x in test_X:
 			# x = x[:-1]

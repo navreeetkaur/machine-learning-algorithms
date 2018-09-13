@@ -14,8 +14,8 @@ def gaussian_multivar(x, mu, sigma):
 
 def gaussian(x, mu, sigma2):
 	# x is a number; u is a number; sigma2 is a number(variance)
-	scale = math.sqrt((2*math.pi* sigma2))*(-1)
-	exp = np.exp((x-mu)*(1.0/(2*sigma2)))
+	scale = math.sqrt((2*math.pi* sigma2))**(-1)
+	exp = np.exp(((x-mu)**2)*(-1.0/(2*sigma2)))
 	return scale*exp
 
 
