@@ -51,6 +51,7 @@ class PCA(object):
 		self.eigvecs = 0
 		self.eigvals = 0
 		self.k = k
+		self.var_retained = 0
 		self.X = self.scale(data)
 		self.U = self.compute_eigen()
 		
@@ -92,11 +93,12 @@ class PCA(object):
 		# calculate variance retained by keeping k components
 		sum_n_eigvals = eigvals.sum()
 		curr_sum = eigvals[0]
-		for i in range(1,k):
+		for i in range(1,self.k):
 			curr_sum += eigvals[i]
 			var_retained = curr_sum/(1.0*sum_n_eigvals)
 
 		U = eigvecs
+		self.var_retained = var_retained
 
 		print (f'Number of dimensions retained: [ {self.k} ]')
 		print (f'Variance retained: [ {var_retained} ]')

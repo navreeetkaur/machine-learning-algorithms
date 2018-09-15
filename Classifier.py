@@ -3,6 +3,7 @@ import sys
 
 from sklearn.naive_bayes import GaussianNB
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 import Bayes,performanceAnalyser, Preprocessing
 import kmeans
@@ -48,12 +49,12 @@ class Classifier:
 					test_array[i][j] = float(record[j+1])
 				y_label = record[0]
 				if y_label == 'HEALTHY':
-					test_array[i][3] = 1
+					test_array[i][3] = 0
 				elif y_label == 'MEDICATION':
-					test_array[i][3] = 2
+					test_array[i][3] = 1
 				elif y_label == 'SURGERY':
-					test_array[i][3] = 3
-				if test_array[i][3] == 0:
+					test_array[i][3] = 2
+				if test_array[i][3] == -1:
 					print("Invalid treatment type detected at line "+int(index+2))
 					exit()
 				i+=1
@@ -70,12 +71,12 @@ class Classifier:
 					train_array[i][j] = float(record[j+1])
 				y_label = record[0]
 				if y_label == 'HEALTHY':
-					train_array[i][3] = 1
+					train_array[i][3] = 0
 				elif y_label == 'MEDICATION':
-					train_array[i][3] = 2
+					train_array[i][3] = 1
 				elif y_label == 'SURGERY':
-					train_array[i][3] = 3
-				if train_array[i][3] == 0:
+					train_array[i][3] = 2
+				if train_array[i][3] == -1:
 					print("Invalid treatment type detected at line "+int(index+2))
 					exit()
 				i+=1
@@ -277,7 +278,13 @@ if __name__ == '__main__':
 	inputDataClass = Classifier(inputDataFile,mode)
 
 	if mode == 1:
-		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], retain_var = 0.85)					##### Hyperparameter ####
+
+		########################################################### PCA #############################################
+
+		##### Our PCA ####
+		reduced_columns = 80
+
+		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
 		inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
 		print("train_data reduced. YAYAYAYA")
@@ -287,8 +294,25 @@ if __name__ == '__main__':
 		print("test_data reduced. YAYAYAYA")
 		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
 
+
+		### SKlearn PCA #####
+
+		# pca = PCA(n_components=80,whiten=False)
+		# pca.fit(inputDataClass.Train[:,:-1])
+		# reduced_train = pca.transform(inputDataClass.Train[:,:-1])
+		# inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
+		# reduced_test = pca.transform(inputDataClass.Test[:,:-1])
+		# inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
+
+
+
+
+
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
 	# Visualization.visualizeData(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+
+	correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
+	Visualization.visualizeCorrelation(correlation_dict)
 
 	"""################################# Bayes Classifier #############################################"""
 
@@ -307,7 +331,7 @@ if __name__ == '__main__':
 
 
 	print("\nMy Naive Bayes")
-	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
 	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
 	bayesClassifier.train(inputDataClass.Train)
 	print("Training of model done. YAYAYYA")
@@ -329,6 +353,8 @@ if __name__ == '__main__':
 
 
 	print("Prediction done. YAYAYYA")
+	confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+	# Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
 

@@ -33,3 +33,25 @@ def visualizeData(X):
 		for i in range(mat.shape[1]):
 			# print(i)
 			visualiseCCD(mat[:,i],label,i)
+
+def visualizeConfusion(X):
+	ax = sns.heatmap(X, annot=True, fmt="d", cbar = False)
+
+	plt.title('Confusion matrix')
+	plt.ylabel('True Class')
+	plt.xlabel('Predicted Class')
+	plt.show()
+
+def visualizeCorrelation(cor_dict):
+
+	for label in cor_dict:
+		x = cor_dict[label]
+		ax = sns.heatmap(x)
+		plt.title('Correlation matrix for class '+str(int(label)))
+		plt.ylabel('Features')
+		plt.xlabel('Features')
+		plt.show()
+
+	
+
+

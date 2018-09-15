@@ -52,6 +52,12 @@ def gaussian_mle(X):
 		sigma[label] = np.matmul(sliced_matrix[label].transpose(),sliced_matrix[label])
 		sigma[label] = sigma[label]*1.0/total_pnts	
 
+	# print(sigma)
+
+	# for label in sigma:
+	# 	Visualization.visualizeCorrelation(sigma[label],label)
+
+
 	return [mu, sigma]
 
 def multinomial_mle(X):
