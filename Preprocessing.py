@@ -34,26 +34,25 @@ class Normalise(object):
 		elif len(self.scale_mean)!=0 and len(self.scale_sigma)!=0:
 			X = np.divide((X - self.scale_mean),(1.0*self.scale_sigma))
 			return X
-			
+
 		else:
 			return
 
 
 
 class PCA(object):
-	def __init__(self, data, retain_var = 0.95, whiten = False, regularization = 10e-5):
-		self.retain_var = retain_var
+	def __init__(self, data, k, whiten = False, regularization = 10e-5):
 		self.whiten = whiten
 		self.regularization = regularization
 		self.scale_mean = 0
 		self.scale_sigma = 0
-		self.X = self.scale(data)
-		self.U = self.compute_eigen()
 		self.x_rot = 0
 		self.W = 0
 		self.eigvecs = 0
 		self.eigvals = 0
-		self.k = 0
+		self.k = k
+		self.X = self.scale(data)
+		self.U = self.compute_eigen()
 		
 
 	# feature scaling by Z-scoring 
@@ -90,18 +89,18 @@ class PCA(object):
 		eigvecs = eigvecs[eig_sort[::-1]]
 		# print("Eigenvalues and vectors computed. YAYAY")
 
-		# choose top k eigenvectors to form U - top k is determined by retaining 95% variance
+		# calculate variance retained by keeping k components
 		sum_n_eigvals = eigvals.sum()
 		curr_sum = eigvals[0]
-		for k in range(1,len(eigvals)):
-			curr_sum += eigvals[k]
+		for i in range(1,k):
+			curr_sum += eigvals[i]
 			var_retained = curr_sum/(1.0*sum_n_eigvals)
-			if var_retained >= self.retain_var:
-				break
 
-		#U = eigvecs[:][:k+1] # (k x d)
-		self.k = k
+		U = eigvecs
+
 		print (f'Number of dimensions retained: [ {self.k} ]')
+		print (f'Variance retained: [ {var_retained} ]')
+		
 		# rotated version of X in the space with eigenvector basis
 		self.x_rot = np.matmul(U.transpose(), self.X.transpose()).transpose() # (d x d, d x n).T  -> n x d
 		# print("x_rot. YAYAY")
