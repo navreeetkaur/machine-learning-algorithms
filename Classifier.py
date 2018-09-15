@@ -280,16 +280,16 @@ if __name__ == '__main__':
 	if mode == 1:
 		
 		############################################## Visualisation #############################################
-		variance v/s n_components : Fashion MNIST
-		start = 10
-		stop = 500
-		step = 15
-		Visualization.var_vs_comp(inputDataClass.Train[:,:-1], start, stop, step)
+		# variance v/s n_components : Fashion MNIST
+		# start = 10
+		# stop = 500
+		# step = 15
+		# Visualization.var_vs_comp(inputDataClass.Train[:,:-1], start, stop, step)
 
 		########################################################### PCA #############################################
 
 		##### Our PCA ####
-		reduced_columns = 80
+		reduced_columns = 5
 
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
@@ -322,6 +322,7 @@ if __name__ == '__main__':
 	# Visualization.visualizeCorrelation(correlation_dict)
 
 	# Visualization.visualizeDataPoints(inputDataClass.Train)
+	Visualization.comp_vs_var_accuracy()
 
 	"""################################# Bayes Classifier #############################################"""
 
@@ -369,17 +370,17 @@ if __name__ == '__main__':
 	"""##############################################################################"""
 
 	
-	## precision-recall curve
-	probas = bayesClassifier.get_probas()
-	precision, recall, _ = precision_recall_curve(Ytrue, probas)
+	############################ precision-recall curve #############################
+	# probas = bayesClassifier.get_probas()
+	# precision, recall, _ = precision_recall_curve(Ytrue, probas)
 
-	plt.step(recall, precision, color='b', alpha=0.2, where='post')
-	plt.fill_between(recall, precision, step='post', alpha=0.2,color='b')
-	plt.xlabel('Recall')
-	plt.ylabel('Precision')
-	plt.ylim([0.0, 1.05])
-	plt.xlim([0.0, 1.0])
-	plt.title('Precision Recall Curve')
+	# plt.step(recall, precision, color='b', alpha=0.2, where='post')
+	# plt.fill_between(recall, precision, step='post', alpha=0.2,color='b')
+	# plt.xlabel('Recall')
+	# plt.ylabel('Precision')
+	# plt.ylim([0.0, 1.05])
+	# plt.xlim([0.0, 1.0])
+	# plt.title('Precision Recall Curve')
 
 
 	"""################################# KMEANS #############################################"""

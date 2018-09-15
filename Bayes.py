@@ -62,6 +62,7 @@ class Bayes:
 		# print(self.parameters[4])
 		# print(self.parameters[5])
 		predicted_class = []
+		probas = []
 		for x in test_X:
 			# x = x[:-1]
 			posteriors = {}
@@ -84,8 +85,8 @@ class Bayes:
 
 			best_class = max(posteriors.items(), key=operator.itemgetter(1))[0]
 			predicted_class.append(best_class)
-			probas.append(posteriors[best_class])
-			self.posterior_probas = probas		
+			probas.append(posteriors)
+		self.posterior_probas = probas		
 		return predicted_class
 	
 	def get_probas(self):

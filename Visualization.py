@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import Preprocessing
+from cycler import cycler
 
 sns.set(color_codes=True)
 
@@ -90,6 +91,19 @@ def var_vs_comp(X, start, stop, step):
 	plt.xlabel('number of components')
 	plt.show()
 
+def comp_vs_var_accuracy():
+	n_cols = [1,2,5,10,20,40,80,160,320,640,784]
+	var_retained = [22,36.4,51.1,62,70,77,85,91.4,96.4,99.6,100]
+	accuracy = [27.7,45.6,59.3,65.3,67.1,68.4,69.5,69.0,69.2,69.3,69.3]
+
+	plt.gca().set_prop_cycle(cycler('color',['r', 'g']))
+	plt.plot(n_cols,var_retained)
+	plt.plot(n_cols,accuracy)
+	plt.xlabel('Columns Retained')
+	plt.legend(['Variance Retained', 'Accuracy'], loc='upper left')
+	plt.show()
+
+
 def visualizeDataPoints(X):
 	# data is complete matrix with labels
 
@@ -122,8 +136,6 @@ def visualizeDataPoints(X):
 		mat_trans = sliced_matrix[label].transpose()
 		ax.scatter(mat_trans[0], mat_trans[1], mat_trans[2], alpha=0.8, c=colors[i], edgecolors='none', s=30, label=groups[i])
 		i+=1
-
-
 
 	plt.title('3d data scatter plot')
 	plt.legend(loc=2)

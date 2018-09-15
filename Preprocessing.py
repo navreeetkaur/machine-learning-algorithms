@@ -91,11 +91,14 @@ class PCA(object):
 		# print("Eigenvalues and vectors computed. YAYAY")
 
 		# calculate variance retained by keeping k components
+		# var_retained=0
 		sum_n_eigvals = eigvals.sum()
-		curr_sum = eigvals[0]
-		for i in range(1,self.k):
+		# curr_sum = eigvals[0]
+		curr_sum = 0
+		for i in range(0,self.k):
 			curr_sum += eigvals[i]
-			var_retained = curr_sum/(1.0*sum_n_eigvals)
+		
+		var_retained = curr_sum/(1.0*sum_n_eigvals)
 
 		U = eigvecs
 		self.var_retained = var_retained
