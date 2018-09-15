@@ -309,10 +309,12 @@ if __name__ == '__main__':
 
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	# Visualization.visualizeData(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
 
-	correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
-	Visualization.visualizeCorrelation(correlation_dict)
+	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
+	# Visualization.visualizeCorrelation(correlation_dict)
+
+	# Visualization.visualizeDataPoints(inputDataClass.Train)
 
 	"""################################# Bayes Classifier #############################################"""
 
@@ -344,12 +346,14 @@ if __name__ == '__main__':
 	Ytrue = inputDataClass.Test[:,-1]
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	precision,recall = performanceAnalyser.goodness(Ytrue,Ypred)
+	precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
 
 	print("\nPrecision")
 	print(precision)
 	print("Recall")
 	print(recall)
+	print("F1 Score")
+	print(f1score)
 
 
 	print("Prediction done. YAYAYYA")
@@ -368,7 +372,7 @@ if __name__ == '__main__':
 	# print(rms)
 	# print("Kmeans done")
 
-	# kmeans.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
+	# Visualization.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
 	# print("Kmeans visualized")
 
 	"""##############################################################################"""

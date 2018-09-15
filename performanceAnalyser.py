@@ -18,6 +18,7 @@ class PerformanceCheck:
 		n = len(ytrue)
 		precision = {}
 		recall = {}
+		f1score = {}
 		Classes, trues = np.unique(ytrue, return_counts = True)
 		Classes1, predicts = np.unique(ypred, return_counts = True)
 		for i in Classes:
@@ -30,9 +31,12 @@ class PerformanceCheck:
 		for i in range(0,len(trues)):
 			precision[Classes[i]] = precision[Classes[i]]/predicts[i]
 			recall[Classes1[i]] = recall[Classes1[i]]/trues[i]
+
+		for label in precision:
+			f1score[label] = 2 * precision[label]*recall[label]/(precision[label] + recall[label])
 		# print(precision)
 		# print(recall)
-		return precision,recall
+		return precision,recall,f1score
 
 
 	def getConfusionMatrix(self,ytrue,ypred):
