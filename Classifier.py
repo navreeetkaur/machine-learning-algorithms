@@ -278,6 +278,13 @@ if __name__ == '__main__':
 	inputDataClass = Classifier(inputDataFile,mode)
 
 	if mode == 1:
+		
+		############################################## Visualisation #############################################
+		variance v/s n_components : Fashion MNIST
+		start = 10
+		stop = 500
+		step = 15
+		Visualization.var_vs_comp(inputDataClass.Train[:,:-1], start, stop, step)
 
 		########################################################### PCA #############################################
 
@@ -361,6 +368,18 @@ if __name__ == '__main__':
 	# Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
+	
+	## precision-recall curve
+	probas = bayesClassifier.get_probas()
+	precision, recall, _ = precision_recall_curve(Ytrue, probas)
+
+	plt.step(recall, precision, color='b', alpha=0.2, where='post')
+	plt.fill_between(recall, precision, step='post', alpha=0.2,color='b')
+	plt.xlabel('Recall')
+	plt.ylabel('Precision')
+	plt.ylim([0.0, 1.05])
+	plt.xlim([0.0, 1.0])
+	plt.title('Precision Recall Curve')
 
 
 	"""################################# KMEANS #############################################"""
