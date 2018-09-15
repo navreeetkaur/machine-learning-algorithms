@@ -1,6 +1,9 @@
 import numpy as np
 import sys
 
+from sklearn.naive_bayes import GaussianNB
+from sklearn.cluster import KMeans
+
 import Bayes,performanceAnalyser, Preprocessing
 import kmeans
 import KNN
@@ -275,11 +278,11 @@ if __name__ == '__main__':
 
 	if mode == 1:
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], retain_var = 0.85)					##### Hyperparameter ####
-		reduced_train = pca.reduce(inputDataClass.Train[:,:-1])
+		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
 		inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
 		print("train_data reduced. YAYAYAYA")
 		print("Train data reduced to columns = "+str(reduced_train.shape[1]))
-		reduced_test = pca.reduce(inputDataClass.Test[:,:-1])
+		reduced_test = pca.reduce(inputDataClass.Test[:,:-1], False)
 		inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
 		print("test_data reduced. YAYAYAYA")
 		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
@@ -288,7 +291,23 @@ if __name__ == '__main__':
 	# Visualization.visualizeData(np.vstack((inputDataClass.Train,inputDataClass.Test)))
 
 	"""################################# Bayes Classifier #############################################"""
-	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+
+	# Sklearn
+	print("\nSklearn Naive Bayes")
+	clf = GaussianNB()
+	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+
+	Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+
+	print("\nMy Naive Bayes")
+	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
 	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
 	bayesClassifier.train(inputDataClass.Train)
 	print("Training of model done. YAYAYYA")
@@ -303,7 +322,7 @@ if __name__ == '__main__':
 
 	precision,recall = performanceAnalyser.goodness(Ytrue,Ypred)
 
-	print("Precision")
+	print("\nPrecision")
 	print(precision)
 	print("Recall")
 	print(recall)
@@ -315,6 +334,8 @@ if __name__ == '__main__':
 
 
 	"""################################# KMEANS #############################################"""
+
+	# kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
 
 	# k = 3						### Hyperparameter ###
 	# labels, means, rms = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],num_runs = 100)
@@ -340,9 +361,3 @@ if __name__ == '__main__':
 	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 	"""###################################################################################"""
-
-	
-
-
-
-
