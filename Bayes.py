@@ -15,6 +15,7 @@ class Bayes:
 		self.isNaive = isNaive
 		self.distribution = distribution
 		self.parameters = []
+		self.posterior_probas = []
 
 
 	# algorithm
@@ -81,11 +82,18 @@ class Bayes:
 
 				posteriors[c] = likelihood*self.priors[c]
 
-
-			predicted_class.append(max(posteriors.items(), key=operator.itemgetter(1))[0])
+			best_class = max(posteriors.items(), key=operator.itemgetter(1))[0]
+			predicted_class.append(best_class)
+			probas.append(posteriors[best_class])
+			self.posterior_probas = probas		
 		return predicted_class
+	
+	def get_probas(self):
+		if len(self.posterior_probas)==0:
+			print("WARNING: pass training data to predict first")
+		return self.posterior_probas
 
-
+	
 	def ml_estimate(self,data):
 		# Returns list of parameters for each distribution type; parameter list of length same as distribution
 		# probability distribution of x given theta(parameters)
