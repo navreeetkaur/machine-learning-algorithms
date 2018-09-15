@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import axes3d
 # Also, check that every majority label  is different
 
 class k_means:
-	def __init__(self,k,inputs,names):
+	def __init__(self,k,inputs,names,test):
 		self.k = k
 		self.input = inputs
 		n = len(inputs[0])
@@ -20,6 +20,7 @@ class k_means:
 		for i in range(0,k):
 			labelList=[]
 			self.labels.update({i:labelList})
+		self.test = test
 
 	def init_guess(self):
 		a = len(self.input[0])
@@ -91,8 +92,6 @@ class k_means:
 				b=True
 		return b
 
-
-
 	def printarr(self):
 		for i in range(0, len(self.input)):
 				print (self.input[i])
@@ -138,13 +137,10 @@ class k_means:
 
 	def allot(self):
 		ans = []
-		k=0
 		for labels in self.labels:
-			k+=1
 			indices = self.labels[labels]
 			arr = self.names[indices]
 			u,ver  = np.unique(arr, return_counts = True)
-			print("Cluster "+str(k))
 			print(u)
 			print(ver)
 			a = 0
@@ -154,35 +150,52 @@ class k_means:
 			ans.append(u[a])
 		return ans
 
+	def assign(self):
+		n = len(self.test)
+		test = self.test
+		arr = np.zeros(n)
+		means = self.means_arr
+		for i in range(0,n):
+			dis = self.distance(test[i],means[0])
+			min_k = 0
+			for j in range(0,k):
+				new_dis = self.distance(test[i],means[j])
+				if(dis>new_dis):
+					dis = new_dis
+					min_k = j
+			arr[i] = min_k
+		return arr
 
-def main():
-	file = open("test_arr.txt","r")
-	test_arr = np.asarray([[float(x) for x in line.split()] for line in file])
-	file.close()
-	experiment = k_means(2,test_arr)
-	experiment.apply()
-
-if __name__=="__main__":
-	main()
-
-def kfit(arr,k,names,num_runs = 100):
+def kfit(arr,k,names,test,num_runs = 100):
 	rms  = len(arr)*(len(arr[0]))
 	min_arr = np.zeros((k, len(arr[0])))
 	dic = {}
 	for alpha in range(num_runs):
-		experiment = k_means(k, arr,names)
+		experiment = k_means(k, arr,names,test)
 		experiment.apply()
 		if(rms > experiment.rms()):
 			rms = experiment.rms()
 			dic = experiment.labels
 			min_arr = experiment.means_arr
-
 	experiment.labels = dic
 	experiment.means_arr = min_arr
+	arr_assign = experiment.assign()
 	ans = experiment.allot()
-	print("Final class labels: "+str(ans))
+	for i in range(0,len(arr_assign)):
+		arr_assign[i] = ans[arr_assign[i]]
+	print(ans)
 	# print(rms)
-	return experiment.labels, experiment.means_arr, rms
+	return experiment.labels, experiment.means_arr, rms, arr_assign
+
+
+def main():
+	file = open("test_arr.txt","r")
+	test_arr = np.asarray([[float(x) for x in line.split()] for line in file])
+	file.close()
+	kfit(test_arr[:,:-1],2,test_arr[:,-1],test_arr[:,:-1])
+
+if __name__=="__main__":
+	main()
 
 def visualizeKMeans(data,labelDict,k):
 	colors = ("red", "green", "blue")
@@ -193,13 +206,24 @@ def visualizeKMeans(data,labelDict,k):
 		groupedData.append(data[indices,:].transpose())
 
 	fig = plt.figure()
-	ax = fig.add_subplot(1, 1, 1, facecolor="1.0")
+	ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
 	ax = fig.gca(projection='3d')
 
 	for d, c, g in zip(groupedData, colors, groups):
 		x, y, z = d
 		ax.scatter(x, y, z, alpha=0.8, c=c, edgecolors='none', s=30, label=g)
+	 
 
 	plt.title('Matplot 3d scatter plot')
 	plt.legend(loc=2)
 	plt.show()
+
+# self.normalise()
+# 		self.init_guess()
+# 		b = True
+# 		counter = 0
+# 		while(b and counter<=1000000):
+# 			self.allocation()
+# 			b = self.update()
+# 		self.printlabels()
+# 		self.printmeans()
