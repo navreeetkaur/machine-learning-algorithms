@@ -3,6 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import Preprocessing
+
 sns.set(color_codes=True)
 
 def visualiseCCD(X,c,i):
@@ -70,6 +72,22 @@ def visualizeKMeans(data,labelDict,k):
 
 	plt.title('3d KNN scatter plot')
 	plt.legend(loc=2)
+	plt.show()
+	
+def var_vs_comp(X, start, stop, step):
+	print("Making variance v/s components plot. . . ")
+	components = []
+	variances = []
+	d = X.shape[1]
+	i_cols = np.arange(start, stop, step)
+	for k in i_cols:
+		pca = Preprocessing.PCA(X, k = k, whiten = False)
+		components.append(k)
+		variances.append(pca.var_retained)
+		
+	plt.plot(components, variances)
+	plt.ylabel('variance retained')
+	plt.xlabel('number of components')
 	plt.show()
 
 def visualizeDataPoints(X):
