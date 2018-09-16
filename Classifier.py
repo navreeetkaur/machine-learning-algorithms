@@ -387,7 +387,8 @@ if __name__ == '__main__':
 	"""################################# KMEANS #############################################"""
 
 	# k = 3						### Hyperparameter ###
-	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100 )
+	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100, mode = 0 )
 	# print(rms)
 	# print("Kmeans done")
 

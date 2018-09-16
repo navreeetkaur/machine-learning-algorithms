@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
+import math
 
 # from classifier, take classifier.Train[:,-1]
 # Use the labels dict that k means return to select only those indices from y corrosponding to one cluster
@@ -10,7 +11,9 @@ from mpl_toolkits.mplot3d import axes3d
 # Also, check that every majority label  is different
 
 class k_means:
-	def __init__(self,k,inputs,names,test):
+	def __init__(self,k,inputs,names,test,mode):
+		# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+		self.mode = mode
 		self.k = k
 		self.input = inputs
 		n = len(inputs[0])
@@ -48,12 +51,31 @@ class k_means:
 			self.input[:,i] = (self.input[:,i]-mins)/(maxs-mins)
 
 	def distance(self, data1, data2):
-		n = len(data1)
-		dis = 0
-		for i in range(0,n):
-			dis+=pow(data1[i]-data2[i],2)
-		dis = pow(dis,0.5)
-		return dis
+
+
+		if self.mode == 0:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				dis+=pow(data1[i]-data2[i],2)
+			dis = pow(dis,0.5)
+			return dis
+
+		if self.mode == 1:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				dis+=math.fabs(data1[i]-data2[i])
+			return dis
+
+		if self.mode == 2:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				x = math.fabs(data1[i]-data2[i])
+				if x > dis:
+					dis=x
+			return dis
 
 	def allocate(self, data, position):
 		dis = len(self.input[0])
@@ -166,13 +188,13 @@ class k_means:
 			arr[i] = min_k
 		return arr
 
-def kfit(arr,k,names,test,num_runs = 100):
+def kfit(arr,k,names,test,num_runs = 100,mode = 2):
 	rms  = len(arr)*(len(arr[0]))
 	min_arr = np.zeros((k, len(arr[0])))
 	dic = {}
 	for alpha in range(num_runs):
 		# print(alpha)
-		experiment = k_means(k, arr,names,test)
+		experiment = k_means(k, arr,names,test,mode)
 		experiment.apply()
 		if(rms > experiment.rms()):
 			rms = experiment.rms()
