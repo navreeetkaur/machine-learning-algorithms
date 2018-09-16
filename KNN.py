@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class KNN:
 	def __init__(self,k,training_set,testing_set,names,mode,covar,label_with_distance=False):

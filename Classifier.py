@@ -326,17 +326,17 @@ if __name__ == '__main__':
 	"""################################# Bayes Classifier #############################################"""
 
 	# #Sklearn
-	print("\nSklearn Naive Bayes")
-	clf = GaussianNB()
-	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	# print("\nSklearn Naive Bayes")
+	# clf = GaussianNB()
+	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
 	# print("\nMy Naive Bayes")
@@ -410,20 +410,20 @@ if __name__ == '__main__':
 
 	"""################################# KNN #############################################"""
 
-	# nearestNeighbours = 8		### Hyperparameter ###
+	nearestNeighbours = 15	### Hyperparameter ###
 	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
-	# mode = 0
+	mode = 3
 	covar = -1
 	if mode == 3:
 		covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
-	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
-	# knn.allocate()
-	# Ypred = knn.labels
-	# Ytrue = inputDataClass.Test[:,-1]
-	# # print(Ytrue)
-	# # print(Ypred)
+	knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
+	knn.allocate()
+	Ypred = knn.labels
+	Ytrue = inputDataClass.Test[:,-1]
+	# print(Ytrue)
+	# print(Ypred)
 
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 	"""###################################################################################"""
 
