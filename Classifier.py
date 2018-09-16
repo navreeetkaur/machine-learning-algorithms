@@ -10,6 +10,8 @@ import kmeans
 import KNN
 import Visualization
 
+import ROC
+
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
 class Classifier:
@@ -360,7 +362,11 @@ if __name__ == '__main__':
 
 	
 	############################ precision-recall curve #############################
-	# probas = bayesClassifier.get_probas()
+	threshold = [0.8, 0.6, 0.5, 0.4, 0.2]
+	probas = bayesClassifier.get_probas()
+	roc = ROC.Roc(Ytrue,probas,threshold)
+	roc.Roc_gen()
+
 	# precision, recall, _ = precision_recall_curve(Ytrue, probas)
 
 	# plt.step(recall, precision, color='b', alpha=0.2, where='post')
