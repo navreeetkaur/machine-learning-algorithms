@@ -74,65 +74,7 @@ class Classifier:
 				if test_array[i][3] == -1:
 					print("Invalid treatment type detected at line "+int(index+2))
 					exit()
-		# with open(inputDataFile,'r') as inputFile:
-		# 	lines = inputFile.readlines()
-		# 	lines = lines[1:]
-		# 	labels = ['TEST1','TEST2','TEST3','Health']
-		# 	num_labels = len(labels)
-		# 	num_records= len(lines)
-		# 	num_train = int(Classifier.train_test_ratio*num_records)
-		# 	num_test = num_records - num_train
-		# 	test_array = np.zeros((num_test,num_labels),dtype= np.float64)
-		# 	train_array = np.zeros((num_train,num_labels),dtype=np.float64)
-		# 	test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
-		# 	# print(test_indices)
-		# 	i=0
-		# 	for index in test_indices:
-		# 		record = lines[index]
-		# 		if record.strip() == '':
-		# 			continue
-		# 		record = record.strip().split(',')
-		# 		for j in range(num_labels-1):
-		# 			# print(j,num_labels)
-		# 			# print(record[j+1])
-		# 			test_array[i][j] = float(record[j+1])
-		# 		y_label = record[0]
-		# 		if y_label == 'HEALTHY':
-		# 			test_array[i][3] = 0
-		# 		elif y_label == 'MEDICATION':
-		# 			test_array[i][3] = 1
-		# 		elif y_label == 'SURGERY':
-		# 			test_array[i][3] = 2
-		# 		if test_array[i][3] == -1:
-		# 			print("Invalid treatment type detected at line "+int(index+2))
-		# 			exit()
-		# 		i+=1
 
-		# 	i=0
-		# 	for index in range(num_records):
-		# 		if index in test_indices:
-		# 			continue
-		# 		record = lines[index]
-		# 		if record.strip() == '':
-		# 			continue
-		# 		record = record.strip().split(',')
-		# 		for j in range(num_labels-1):
-		# 			train_array[i][j] = float(record[j+1])
-		# 		y_label = record[0]
-		# 		if y_label == 'HEALTHY':
-		# 			train_array[i][3] = 0
-		# 		elif y_label == 'MEDICATION':
-		# 			train_array[i][3] = 1
-		# 		elif y_label == 'SURGERY':
-		# 			train_array[i][3] = 2
-		# 		if train_array[i][3] == -1:
-		# 			print("Invalid treatment type detected at line "+int(index+2))
-		# 			exit()
-		# 		i+=1
-
-		# # print(train_array)
-		# # print(test_array)
-		# # print(labels)
 		return train_array,test_array,labels
 
 
@@ -170,9 +112,6 @@ class Classifier:
 					test_array[i][j] = int(record[j+1])
 				test_array[i][num_labels-1] = int(record[0])
 
-		# print(train_array)
-		# print(test_array)
-		# print(labels)
 		return train_array,test_array,labels
 
 
@@ -289,10 +228,6 @@ class Classifier:
 				train_array[i][6] = int(record[1])
 
 				i+=1
-
-			# print(train_array)
-			# print(test_array)
-			# print(labels)
 			return train_array,test_array,labels	
 
 
