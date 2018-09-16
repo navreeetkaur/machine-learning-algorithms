@@ -42,7 +42,7 @@ class KNN:
 
 		if self.mode == 3:
 			dis = np.matmul(np.matmul((data1 - data2).transpose(),self.covarinv),data1-data2)
-			return dis
+			return dis**0.5
 
 	def sortedarr_k(self,data1):
 		k = self.k
