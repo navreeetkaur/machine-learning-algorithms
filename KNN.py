@@ -1,22 +1,41 @@
 import numpy as np
 
 class KNN:
-	def __init__(self,k,training_set,testing_set,names,label_with_distance=False):
+	def __init__(self,k,training_set,testing_set,names,label_with_distance=False,mode):
 		self.k = k
+		self.mode = mode
 		self.training_set = training_set
 		self.testing_set = testing_set
 		self.labels = np.zeros(len(testing_set))
 		self.names = names
 		self.label_with_distance = label_with_distance
 
-	def distance(self,data1,data2):
-		n = len(data1)
-		dis = 0
-		arr = data1-data2
-		arr = np.square(arr)
-		dis = sum(arr)
-		dis = pow(dis,0.5)
-		return dis
+	def distance(self, data1, data2):
+
+
+		if self.mode == 0:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				dis+=pow(data1[i]-data2[i],2)
+			dis = pow(dis,0.5)
+			return dis
+
+		if self.mode == 1:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				dis+=math.fabs(data1[i]-data2[i])
+			return dis
+
+		if self.mode == 2:
+			n = len(data1)
+			dis = 0
+			for i in range(0,n):
+				x = math.fabs(data1[i]-data2[i])
+				if x > dis:
+					dis=x
+			return dis
 
 	def sortedarr_k(self,data1):
 		k = self.k

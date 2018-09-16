@@ -404,8 +404,9 @@ if __name__ == '__main__':
 
 	"""################################# KNN #############################################"""
 
-	# nearestNeighbours = 15		### Hyperparameter ###
-	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False)
+	# nearestNeighbours = 8		### Hyperparameter ###
+	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode = 0)
 	# knn.allocate()
 	# Ypred = knn.labels
 	# Ytrue = inputDataClass.Test[:,-1]
