@@ -289,7 +289,7 @@ if __name__ == '__main__':
 		########################################################### PCA #############################################
 
 		##### Our PCA ####
-		reduced_columns = 3
+		reduced_columns = 80
 
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
@@ -312,8 +312,13 @@ if __name__ == '__main__':
 		# inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
 
 
+	######################################## Normalising Data ####################################
+	normalizer = Preprocessing.Normalise()
+	inputDataClass.Train = np.hstack((normalizer.scale(inputDataClass.Train[:,:-1],train=True),inputDataClass.Train[:,-1].reshape(-1,1)))
+	inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
 
 
+	##############################################################################################
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
 	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
@@ -321,12 +326,12 @@ if __name__ == '__main__':
 	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
 	# Visualization.visualizeCorrelation(correlation_dict)
 
-	Visualization.visualizeDataPoints(inputDataClass.Train)
-	Visualization.comp_vs_var_accuracy()
+	# Visualization.visualizeDataPoints(inputDataClass.Train)
+	# Visualization.comp_vs_var_accuracy()
 
 	"""################################# Bayes Classifier #############################################"""
 
-	# Sklearn
+	Sklearn
 	print("\nSklearn Naive Bayes")
 	clf = GaussianNB()
 	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
@@ -340,33 +345,25 @@ if __name__ == '__main__':
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
-	print("\nMy Naive Bayes")
-	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	bayesClassifier.train(inputDataClass.Train)
-	print("Training of model done. YAYAYYA")
+	# print("\nMy Naive Bayes")
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	# # bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	# bayesClassifier.train(inputDataClass.Train)
+	# print("Training of model done. YAYAYYA")
 
-	Ypred = bayesClassifier.fit(inputDataClass.Train)
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = bayesClassifier.fit(inputDataClass.Train)
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	Ypred = bayesClassifier.fit(inputDataClass.Test)
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-	precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
-
-	print("\nPrecision")
-	print(precision)
-	print("Recall")
-	print(recall)
-	print("F1 Score")
-	print(f1score)
+	# Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
-	print("Prediction done. YAYAYYA")
+	# print("Prediction done. YAYAYYA")
+
 	confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
-	# Visualization.visualizeConfusion(confusion)
+	Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
 	
@@ -387,10 +384,14 @@ if __name__ == '__main__':
 
 	# kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
 
-	# k = 3						### Hyperparameter ###
-	# labels, means, rms = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],num_runs = 100)
+	# k = 10						### Hyperparameter ###
+	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 2 )
 	# print(rms)
 	# print("Kmeans done")
+
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
 
 	# Visualization.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
 	# print("Kmeans visualized")
@@ -401,7 +402,7 @@ if __name__ == '__main__':
 	"""################################# KNN #############################################"""
 
 	# nearestNeighbours = 10		### Hyperparameter ###
-	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1])
+	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False)
 	# knn.allocate()
 	# Ypred = knn.labels
 	# Ytrue = inputDataClass.Test[:,-1]
@@ -411,3 +412,12 @@ if __name__ == '__main__':
 	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 	"""###################################################################################"""
+
+	precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
+
+	print("\nPrecision")
+	print(precision)
+	print("Recall")
+	print(recall)
+	print("F1 Score")
+	print(f1score)

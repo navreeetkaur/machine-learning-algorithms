@@ -158,7 +158,7 @@ class k_means:
 		for i in range(0,n):
 			dis = self.distance(test[i],means[0])
 			min_k = 0
-			for j in range(0,k):
+			for j in range(0,self.k):
 				new_dis = self.distance(test[i],means[j])
 				if(dis>new_dis):
 					dis = new_dis
@@ -171,6 +171,7 @@ def kfit(arr,k,names,test,num_runs = 100):
 	min_arr = np.zeros((k, len(arr[0])))
 	dic = {}
 	for alpha in range(num_runs):
+		print(alpha)
 		experiment = k_means(k, arr,names,test)
 		experiment.apply()
 		if(rms > experiment.rms()):
@@ -182,7 +183,8 @@ def kfit(arr,k,names,test,num_runs = 100):
 	arr_assign = experiment.assign()
 	ans = experiment.allot()
 	for i in range(0,len(arr_assign)):
-		arr_assign[i] = ans[arr_assign[i]]
+		# print(arr_assign[i])
+		arr_assign[i] = ans[int(arr_assign[i])]
 	print(ans)
 	# print(rms)
 	return experiment.labels, experiment.means_arr, rms, arr_assign
