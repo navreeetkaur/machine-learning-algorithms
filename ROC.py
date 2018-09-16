@@ -1,3 +1,12 @@
+# This ROC file contains an Roc class
+# It has three functions apart from an initialisation
+# Among the initialisations, ytrue is a list of true class values
+# yprob is a dictionary corresponding to each data point.
+# The dictionary contains keys as the classes with values as the corresponding probabilities.
+# The threshold is an np array which will specify the different threshold values to mark points
+
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 class Roc:
@@ -7,6 +16,8 @@ class Roc:
 		self.yprob = yprob
 		self.threshold = threshold # an array of chosen threshold values for plotting
 
+
+# The following functioni will take a classname and calculate necessary values like TPR and TNR
 	def generate_start(self,classname):
 		n = len(self.ytrue)
 		ytrue = self.ytrue
@@ -45,12 +56,16 @@ class Roc:
 			tnr[i] = TNR
 			return tpr,tnr
 
+#This function only plots values accrding to given arrays x and y
+
 	def plot(self,x,y,classname):
 		plt.plot(x,y)
 		plt.xlabel('True Negative Rate')
 		plt.ylabel('True Positive Rate')
 		plt.title("Class - "+classname)
 		plt.show()
+
+# The following function actually generates as many ROC curves as there are classes in the data
 
 	def Roc_gen(self): # this function needs to be called for ROC generation
 		a = set(self.ytrue)
