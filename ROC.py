@@ -27,6 +27,7 @@ class Roc:
 		tpr = np.zeros(m)
 		tnr = np.zeros(m)
 		for item in range(0,m):
+			# print(threshold[item])
 			positive = 0 
 			negative = 0
 			TP = 0
@@ -37,24 +38,28 @@ class Roc:
 				else:
 					negative+=1
 			for i in range(0,n):
+				# print(ytrue[i])
 				dic = yprob[i]
-				maxprob = 0
-				maxclass = 0
+				maxprob = 0.0
+				maxclass = 0.0
 				for keys in dic:
+					# print(keys)
 					if(dic[keys]>maxprob):
 						maxprob = dic[keys]
 						maxclass = keys
 				if(ytrue[i]==classname and maxclass==classname and maxprob>=threshold[item]):
+					# print("hello")
 					TP+=1
 				elif(ytrue[i]!=classname and maxclass!=classname):
 					TN+=1
 				elif(ytrue[i]!=classname and maxclass==classname and maxprob<threshold[item]):
 					TN+=1
-			TPR = TP/positive
-			TNR = TN/negative
-			tpr[i] = TPR
-			tnr[i] = TNR
-			return tpr,tnr
+			# print(TP)
+			TPR = ((float)(TP))/(float)(positive)
+			TNR = 1.0 - ((float)(TN))/(float)(negative)
+			tpr[item] = TPR
+			tnr[item] = TNR
+		return tpr,tnr
 
 #This function only plots values accrding to given arrays x and y
 
@@ -62,7 +67,7 @@ class Roc:
 		plt.plot(x,y)
 		plt.xlabel('True Negative Rate')
 		plt.ylabel('True Positive Rate')
-		plt.title("Class - "+classname)
+		plt.title("Class - "+(str)(classname))
 		plt.show()
 
 # The following function actually generates as many ROC curves as there are classes in the data
