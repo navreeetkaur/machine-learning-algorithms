@@ -312,8 +312,8 @@ if __name__ == '__main__':
 	##############################################################################################
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
-	exit()
+	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+
 
 	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
 	# Visualization.visualizeCorrelation(correlation_dict)
@@ -338,8 +338,8 @@ if __name__ == '__main__':
 
 
 	print("\nMy Naive Bayes")
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
 	bayesClassifier.train(inputDataClass.Train)
 	print("Training of model done. YAYAYYA")
 
@@ -354,8 +354,8 @@ if __name__ == '__main__':
 
 	print("Prediction done. YAYAYYA")
 
-	confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
-	Visualization.visualizeConfusion(confusion)
+	# confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+	# Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
 	
@@ -374,10 +374,8 @@ if __name__ == '__main__':
 
 	"""################################# KMEANS #############################################"""
 
-	# kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
-
-	# k = 10						### Hyperparameter ###
-	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 2 )
+	# k = 3						### Hyperparameter ###
+	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100 )
 	# print(rms)
 	# print("Kmeans done")
 
@@ -393,7 +391,7 @@ if __name__ == '__main__':
 
 	"""################################# KNN #############################################"""
 
-	# nearestNeighbours = 10		### Hyperparameter ###
+	# nearestNeighbours = 15		### Hyperparameter ###
 	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False)
 	# knn.allocate()
 	# Ypred = knn.labels

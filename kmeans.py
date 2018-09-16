@@ -171,7 +171,7 @@ def kfit(arr,k,names,test,num_runs = 100):
 	min_arr = np.zeros((k, len(arr[0])))
 	dic = {}
 	for alpha in range(num_runs):
-		print(alpha)
+		# print(alpha)
 		experiment = k_means(k, arr,names,test)
 		experiment.apply()
 		if(rms > experiment.rms()):

@@ -107,6 +107,18 @@ def comp_vs_var_accuracy():
 	plt.legend(['Variance Retained', 'Accuracy'], loc='upper left')
 	plt.show()
 
+def plotBayesvsNaiveBayes():
+	n_cols = [10,30,50,80]
+	bayes = [70.2,70.67,70.84,70.51]
+	naive = [65.65,65.58,68.78,69.51]
+
+	plt.gca().set_prop_cycle(cycler('color',['r', 'g']))
+	plt.plot(n_cols,bayes)
+	plt.plot(n_cols,naive)
+	plt.xlabel('No. of components')
+	plt.legend(['Multivariate Bayes', 'Naive Bayes'], loc='upper left')
+	plt.show()
+
 
 def visualizeDataPoints(X):
 	# data is complete matrix with labels
