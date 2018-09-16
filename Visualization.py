@@ -9,6 +9,8 @@ from cycler import cycler
 sns.set(color_codes=True)
 
 def visualiseCCD(X,c,i):
+	# print(X.shape)
+	# X = X.astype(np.float64)
 	sns.distplot(X);
 	plt.title("CCD for class "+str(c)+" and feature "+str(i))
 	plt.show()
@@ -33,9 +35,11 @@ def visualizeDataCCD(X):
 
 	for label in sliced_matrix:
 		mat = sliced_matrix[label]
-		for i in range(mat.shape[1]):
-			# print(i)
-			visualiseCCD(mat[:,i],label,i)
+		# for i in range(mat.shape[1]):
+		# 	print(i)
+		# 	visualiseCCD(mat[:,i],label,i)
+		visualiseCCD(mat[:,0],label,0)
+
 
 def visualizeConfusion(X):
 	ax = sns.heatmap(X, annot=True, fmt="d", cbar = False)

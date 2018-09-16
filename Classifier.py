@@ -304,15 +304,16 @@ if __name__ == '__main__':
 
 
 	######################################## Normalising Data ####################################
-	normalizer = Preprocessing.Normalise()
-	inputDataClass.Train = np.hstack((normalizer.scale(inputDataClass.Train[:,:-1],train=True),inputDataClass.Train[:,-1].reshape(-1,1)))
-	inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
+	# normalizer = Preprocessing.Normalise()
+	# inputDataClass.Train = np.hstack((normalizer.scale(inputDataClass.Train[:,:-1],train=True),inputDataClass.Train[:,-1].reshape(-1,1)))
+	# inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
 
 
 	##############################################################################################
 
 	performanceAnalyser = performanceAnalyser.PerformanceCheck()
-	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+	Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+	exit()
 
 	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
 	# Visualization.visualizeCorrelation(correlation_dict)
@@ -323,17 +324,17 @@ if __name__ == '__main__':
 	"""################################# Bayes Classifier #############################################"""
 
 	# #Sklearn
-	# print("\nSklearn Naive Bayes")
-	# clf = GaussianNB()
-	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	print("\nSklearn Naive Bayes")
+	clf = GaussianNB()
+	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	# Ytrue = inputDataClass.Train[:,-1]
-	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
 	print("\nMy Naive Bayes")
