@@ -25,45 +25,17 @@ class Classifier:
 			self.Train, self.Test, self.Label = self.collectInputRailway(inputDataFileList)
 
 	def collectInputMedical(self,inputDataFileList):
-		with open(inputDataFile,'r') as inputFile:
+		
+		labels = ['TEST1','TEST2','TEST3','Health']
+		num_labels = len(labels)
+
+		with open(inputDataFileList[0],'r') as inputFile:
 			lines = inputFile.readlines()
 			lines = lines[1:]
-			labels = ['TEST1','TEST2','TEST3','Health']
-			num_labels = len(labels)
 			num_records= len(lines)
-			num_train = int(Classifier.train_test_ratio*num_records)
-			num_test = num_records - num_train
-			test_array = np.zeros((num_test,num_labels),dtype= np.float64)
-			train_array = np.zeros((num_train,num_labels),dtype=np.float64)
-			test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
-			# print(test_indices)
-			i=0
-			for index in test_indices:
-				record = lines[index]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				for j in range(num_labels-1):
-					# print(j,num_labels)
-					# print(record[j+1])
-					test_array[i][j] = float(record[j+1])
-				y_label = record[0]
-				if y_label == 'HEALTHY':
-					test_array[i][3] = 0
-				elif y_label == 'MEDICATION':
-					test_array[i][3] = 1
-				elif y_label == 'SURGERY':
-					test_array[i][3] = 2
-				if test_array[i][3] == -1:
-					print("Invalid treatment type detected at line "+int(index+2))
-					exit()
-				i+=1
-
-			i=0
-			for index in range(num_records):
-				if index in test_indices:
-					continue
-				record = lines[index]
+			train_array = np.zeros((num_records,num_labels),dtype=np.float64)
+			for i in range(num_records):
+				record = lines[i]
 				if record.strip() == '':
 					continue
 				record = record.strip().split(',')
@@ -79,11 +51,88 @@ class Classifier:
 				if train_array[i][3] == -1:
 					print("Invalid treatment type detected at line "+int(index+2))
 					exit()
-				i+=1
 
-		# print(train_array)
-		# print(test_array)
-		# print(labels)
+		with open(inputDataFileList[1],'r') as inputFile:
+			lines = inputFile.readlines()
+			lines = lines[1:]
+			num_records= len(lines)
+			test_array = np.zeros((num_records,num_labels),dtype=np.float64)
+			for i in range(num_records):
+				record = lines[i]
+				if record.strip() == '':
+					continue
+				record = record.strip().split(',')
+				for j in range(num_labels-1):
+					test_array[i][j] = float(record[j+1])
+				y_label = record[0]
+				if y_label == 'HEALTHY':
+					test_array[i][3] = 0
+				elif y_label == 'MEDICATION':
+					test_array[i][3] = 1
+				elif y_label == 'SURGERY':
+					test_array[i][3] = 2
+				if test_array[i][3] == -1:
+					print("Invalid treatment type detected at line "+int(index+2))
+					exit()
+		# with open(inputDataFile,'r') as inputFile:
+		# 	lines = inputFile.readlines()
+		# 	lines = lines[1:]
+		# 	labels = ['TEST1','TEST2','TEST3','Health']
+		# 	num_labels = len(labels)
+		# 	num_records= len(lines)
+		# 	num_train = int(Classifier.train_test_ratio*num_records)
+		# 	num_test = num_records - num_train
+		# 	test_array = np.zeros((num_test,num_labels),dtype= np.float64)
+		# 	train_array = np.zeros((num_train,num_labels),dtype=np.float64)
+		# 	test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
+		# 	# print(test_indices)
+		# 	i=0
+		# 	for index in test_indices:
+		# 		record = lines[index]
+		# 		if record.strip() == '':
+		# 			continue
+		# 		record = record.strip().split(',')
+		# 		for j in range(num_labels-1):
+		# 			# print(j,num_labels)
+		# 			# print(record[j+1])
+		# 			test_array[i][j] = float(record[j+1])
+		# 		y_label = record[0]
+		# 		if y_label == 'HEALTHY':
+		# 			test_array[i][3] = 0
+		# 		elif y_label == 'MEDICATION':
+		# 			test_array[i][3] = 1
+		# 		elif y_label == 'SURGERY':
+		# 			test_array[i][3] = 2
+		# 		if test_array[i][3] == -1:
+		# 			print("Invalid treatment type detected at line "+int(index+2))
+		# 			exit()
+		# 		i+=1
+
+		# 	i=0
+		# 	for index in range(num_records):
+		# 		if index in test_indices:
+		# 			continue
+		# 		record = lines[index]
+		# 		if record.strip() == '':
+		# 			continue
+		# 		record = record.strip().split(',')
+		# 		for j in range(num_labels-1):
+		# 			train_array[i][j] = float(record[j+1])
+		# 		y_label = record[0]
+		# 		if y_label == 'HEALTHY':
+		# 			train_array[i][3] = 0
+		# 		elif y_label == 'MEDICATION':
+		# 			train_array[i][3] = 1
+		# 		elif y_label == 'SURGERY':
+		# 			train_array[i][3] = 2
+		# 		if train_array[i][3] == -1:
+		# 			print("Invalid treatment type detected at line "+int(index+2))
+		# 			exit()
+		# 		i+=1
+
+		# # print(train_array)
+		# # print(test_array)
+		# # print(labels)
 		return train_array,test_array,labels
 
 
@@ -259,6 +308,13 @@ if __name__ == '__main__':
 
 	if inputDataFile == 'Medical_data.csv':
 		mode = 0
+		x= []
+		x.append(inputDataFile)
+		if len(sys.argv) != 3:
+			print('Enter both train and test files')
+			exit()
+		x.append(sys.argv[2])
+		inputDataFile = x
 	elif inputDataFile == 'fashion-mnist_train.csv':
 		mode = 1
 		x= []
@@ -289,7 +345,7 @@ if __name__ == '__main__':
 		########################################################### PCA #############################################
 
 		##### Our PCA ####
-		reduced_columns = 80
+		reduced_columns = 10
 
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
@@ -331,18 +387,18 @@ if __name__ == '__main__':
 
 	"""################################# Bayes Classifier #############################################"""
 
-	Sklearn
-	print("\nSklearn Naive Bayes")
-	clf = GaussianNB()
-	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	# #Sklearn
+	# print("\nSklearn Naive Bayes")
+	# clf = GaussianNB()
+	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
 	# print("\nMy Naive Bayes")
@@ -362,8 +418,8 @@ if __name__ == '__main__':
 
 	# print("Prediction done. YAYAYYA")
 
-	confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
-	Visualization.visualizeConfusion(confusion)
+	# confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+	# Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
 	
