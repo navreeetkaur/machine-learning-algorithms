@@ -1,7 +1,10 @@
 import numpy as np
 
 class KNN:
-	def __init__(self,k,training_set,testing_set,names,label_with_distance=False,mode):
+	def __init__(self,k,training_set,testing_set,names,mode,covar,label_with_distance=False):
+		self.covar = covar
+		if mode == 3:
+			self.covarinv = np.linalg.inv(self.covar)
 		self.k = k
 		self.mode = mode
 		self.training_set = training_set
@@ -35,6 +38,10 @@ class KNN:
 				x = math.fabs(data1[i]-data2[i])
 				if x > dis:
 					dis=x
+			return dis
+
+		if self.mode == 3:
+			dis = np.matmul(np.matmul((data1 - data2).transpose(),self.covarinv),data1-data2)
 			return dis
 
 	def sortedarr_k(self,data1):

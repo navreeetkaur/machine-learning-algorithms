@@ -339,22 +339,22 @@ if __name__ == '__main__':
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
-	print("\nMy Naive Bayes")
-	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	bayesClassifier.train(inputDataClass.Train)
-	print("Training of model done. YAYAYYA")
+	# print("\nMy Naive Bayes")
+	# bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	# # bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	# bayesClassifier.train(inputDataClass.Train)
+	# print("Training of model done. YAYAYYA")
 
-	Ypred = bayesClassifier.fit(inputDataClass.Train)
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = bayesClassifier.fit(inputDataClass.Train)
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	Ypred = bayesClassifier.fit(inputDataClass.Test)
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
-	print("Prediction done. YAYAYYA")
+	# print("Prediction done. YAYAYYA")
 
 	# confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
 	# Visualization.visualizeConfusion(confusion)
@@ -362,16 +362,16 @@ if __name__ == '__main__':
 
 	
 	############################ precision-recall curve #############################
-	threshold = np.arange(0.9,0.1,-0.1)
-	probas = bayesClassifier.get_probas()
-	for dic in probas:
-		sums=0.0
-		for item in dic:
-			sums+=dic[item]
-		for item in dic:
-			dic[item] = dic[item]/sums
-	roc = ROC.Roc(Ytrue,probas,threshold,'')
-	roc.Roc_gen()
+	# threshold = np.arange(0.9,0.1,-0.1)
+	# probas = bayesClassifier.get_probas()
+	# for dic in probas:
+	# 	sums=0.0
+	# 	for item in dic:
+	# 		sums+=dic[item]
+	# 	for item in dic:
+	# 		dic[item] = dic[item]/sums
+	# roc = ROC.Roc(Ytrue,probas,threshold,'')
+	# roc.Roc_gen()
 
 	# precision, recall, _ = precision_recall_curve(Ytrue, probas)
 
@@ -383,12 +383,18 @@ if __name__ == '__main__':
 	# plt.xlim([0.0, 1.0])
 	# plt.title('Precision Recall Curve')
 
+	inputDataClass.Train = inputDataClass.Train[:,1:]
+	inputDataClass.Test = inputDataClass.Test[:,1:]
 
 	"""################################# KMEANS #############################################"""
 
-	# k = 3						### Hyperparameter ###
-	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
-	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100, mode = 0 )
+	# k = 2					### Hyperparameter ###
+	# # mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev, 3: Mahalnobis}
+	# mode = 3
+	# covar = -1
+	# if mode == 3:
+	# 	covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
+	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100, mode = mode,covar=covar)
 	# print(rms)
 	# print("Kmeans done")
 
@@ -406,7 +412,11 @@ if __name__ == '__main__':
 
 	# nearestNeighbours = 8		### Hyperparameter ###
 	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
-	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode = 0)
+	# mode = 0
+	covar = -1
+	if mode == 3:
+		covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
+	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
 	# knn.allocate()
 	# Ypred = knn.labels
 	# Ytrue = inputDataClass.Test[:,-1]

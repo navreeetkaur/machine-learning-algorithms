@@ -92,6 +92,15 @@ class PerformanceCheck:
 
 		return correlation_dict
 
+	def getFullCovariance(self,X):
+		# X is only feature points
+		total_pnts = X.shape[0]
+		mu = np.asarray(X.sum(axis = 0))/(1.0*total_pnts)
+		X = X - mu
+		sigma = np.matmul(X.transpose(),X)
+		sigma = sigma *1.0/total_pnts
+		return sigma
+
 
 
 

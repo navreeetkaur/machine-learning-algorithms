@@ -11,8 +11,11 @@ import math
 # Also, check that every majority label  is different
 
 class k_means:
-	def __init__(self,k,inputs,names,test,mode):
+	def __init__(self,k,inputs,names,test,mode,covar):
 		# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+		self.covar = covar
+		if mode == 3:
+			self.covarinv = np.linalg.inv(self.covar)
 		self.mode = mode
 		self.k = k
 		self.input = inputs
@@ -76,6 +79,11 @@ class k_means:
 				if x > dis:
 					dis=x
 			return dis
+
+		if self.mode == 3:
+			dis = np.matmul(np.matmul((data1 - data2).transpose(),self.covarinv),data1-data2)
+			return dis
+			
 
 	def allocate(self, data, position):
 		dis = len(self.input[0])
@@ -188,13 +196,13 @@ class k_means:
 			arr[i] = min_k
 		return arr
 
-def kfit(arr,k,names,test,num_runs = 100,mode = 2):
+def kfit(arr,k,names,test,num_runs = 100,mode = 0,covar=-1):
 	rms  = len(arr)*(len(arr[0]))
 	min_arr = np.zeros((k, len(arr[0])))
 	dic = {}
 	for alpha in range(num_runs):
 		# print(alpha)
-		experiment = k_means(k, arr,names,test,mode)
+		experiment = k_means(k, arr,names,test,mode,covar)
 		experiment.apply()
 		if(rms > experiment.rms()):
 			rms = experiment.rms()
