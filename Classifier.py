@@ -323,38 +323,38 @@ if __name__ == '__main__':
 	"""################################# Bayes Classifier #############################################"""
 
 	# #Sklearn
-	print("\nSklearn Naive Bayes")
-	clf = GaussianNB()
-	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	# print("\nSklearn Naive Bayes")
+	# clf = GaussianNB()
+	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-	Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-
-	# print("\nMy Naive Bayes")
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	# # bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	# bayesClassifier.train(inputDataClass.Train)
-	# print("Training of model done. YAYAYYA")
-
-	# Ypred = bayesClassifier.fit(inputDataClass.Train)
+	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
 	# Ytrue = inputDataClass.Train[:,-1]
 	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# Ypred = bayesClassifier.fit(inputDataClass.Test)
+	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
 	# Ytrue = inputDataClass.Test[:,-1]
 	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
-	# print("Prediction done. YAYAYYA")
+	print("\nMy Naive Bayes")
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	bayesClassifier.train(inputDataClass.Train)
+	print("Training of model done. YAYAYYA")
 
-	# confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
-	# Visualization.visualizeConfusion(confusion)
+	Ypred = bayesClassifier.fit(inputDataClass.Train)
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	Ypred = bayesClassifier.fit(inputDataClass.Test)
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+
+	print("Prediction done. YAYAYYA")
+
+	confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+	Visualization.visualizeConfusion(confusion)
 	"""##############################################################################"""
 
 	
