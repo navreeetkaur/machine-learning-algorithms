@@ -364,6 +364,12 @@ if __name__ == '__main__':
 	############################ precision-recall curve #############################
 	threshold = [0.8, 0.6, 0.5, 0.4, 0.2]
 	probas = bayesClassifier.get_probas()
+	for dic in probas:
+		sums=0.0
+		for item in dic:
+			sums+=dic[item]
+		for item in dic:
+			dic[item] = dic[item]/sums
 	roc = ROC.Roc(Ytrue,probas,threshold)
 	roc.Roc_gen()
 
