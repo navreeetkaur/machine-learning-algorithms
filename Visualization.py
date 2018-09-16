@@ -107,8 +107,8 @@ def comp_vs_var_accuracy():
 def visualizeDataPoints(X):
 	# data is complete matrix with labels
 
-	colors = ("red", "green", "blue")
-	groups = ("Class 0", "Class 1", "Class 2") 
+	colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k', 'w',(0.5,0.5,0.7),(0.9,0.2,0.7))
+	groups = ("Class 0", "Class 1", "Class 2","Class 3", "Class 4", "Class 5","Class 6", "Class 7", "Class 8","Class 9") 
 
 	# X is complete data matrix with the label
 	N = X.shape[0]	

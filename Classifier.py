@@ -289,7 +289,7 @@ if __name__ == '__main__':
 		########################################################### PCA #############################################
 
 		##### Our PCA ####
-		reduced_columns = 5
+		reduced_columns = 3
 
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
@@ -321,7 +321,7 @@ if __name__ == '__main__':
 	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
 	# Visualization.visualizeCorrelation(correlation_dict)
 
-	# Visualization.visualizeDataPoints(inputDataClass.Train)
+	Visualization.visualizeDataPoints(inputDataClass.Train)
 	Visualization.comp_vs_var_accuracy()
 
 	"""################################# Bayes Classifier #############################################"""
