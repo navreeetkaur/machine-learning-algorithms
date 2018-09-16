@@ -99,7 +99,7 @@ def comp_vs_var_accuracy():
 	plt.gca().set_prop_cycle(cycler('color',['r', 'g']))
 	plt.plot(n_cols,var_retained)
 	plt.plot(n_cols,accuracy)
-	plt.xlabel('Columns Retained')
+	plt.xlabel('No. of components')
 	plt.legend(['Variance Retained', 'Accuracy'], loc='upper left')
 	plt.show()
 

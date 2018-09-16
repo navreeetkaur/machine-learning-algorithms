@@ -280,7 +280,7 @@ if __name__ == '__main__':
 		########################################################### PCA #############################################
 
 		##### Our PCA ####
-		reduced_columns = 10
+		reduced_columns = 80
 
 		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
@@ -323,17 +323,17 @@ if __name__ == '__main__':
 	"""################################# Bayes Classifier #############################################"""
 
 	# #Sklearn
-	# print("\nSklearn Naive Bayes")
-	# clf = GaussianNB()
-	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	print("\nSklearn Naive Bayes")
+	clf = GaussianNB()
+	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	# Ytrue = inputDataClass.Train[:,-1]
-	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
 	# print("\nMy Naive Bayes")
