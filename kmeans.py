@@ -219,16 +219,6 @@ def kfit(arr,k,names,test,num_runs = 100,mode = 0,covar=-1):
 	# print(rms)
 	return experiment.labels, experiment.means_arr, rms, arr_assign
 
-
-def main():
-	file = open("test_arr.txt","r")
-	test_arr = np.asarray([[float(x) for x in line.split()] for line in file])
-	file.close()
-	kfit(test_arr[:,:-1],2,test_arr[:,-1],test_arr[:,:-1])
-
-if __name__=="__main__":
-	main()
-
 def visualizeKMeans(data,labelDict,k):
 	colors = ("red", "green", "blue")
 	groups = ("HEALTHY", "MEDICATION", "SURGERY") 
@@ -259,3 +249,13 @@ def visualizeKMeans(data,labelDict,k):
 # 			b = self.update()
 # 		self.printlabels()
 # 		self.printmeans()
+
+
+def main():
+	file = open("test_arr.txt","r")
+	test_arr = np.asarray([[float(x) for x in line.split()] for line in file])
+	file.close()
+	kfit(test_arr[:,:-1],2,test_arr[:,-1],test_arr[:,:-1])
+
+if __name__=="__main__":
+	main()

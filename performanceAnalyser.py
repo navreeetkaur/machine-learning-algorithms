@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import Visualization
 
 def calcAccuracyTotal(Ypred,Ytrue):
 	tot = len(Ypred)
@@ -49,23 +50,8 @@ def getConfusionMatrix(ytrue,ypred):
 	return confusion
 
 def getCorrelationMatrix(X):
-	# X is complete data matrix with the label
-	N = X.shape[0]	
-	# sorting according to Y
-	X = X[X[:,X.shape[1]-1].argsort()]
-	# slicing matrix acc. to classes
-	sliced_matrix = {}
-	x = X[0][len(X[0])-1]
-	last_index = 0
-	for i in range(1, X.shape[0]):
-		elem = X[i]
-		q = elem[len(elem)-1]
-		if q!= x:
-			sliced_matrix[x] = X[last_index:i, :X.shape[1]-1]
-			last_index = i
-		x = q
-	sliced_matrix[x] = X[last_index:X.shape[0], :X.shape[1]-1]
-
+	
+	sliced_matrix = Visualization.sliceMatrix(X)
 	mu = {}
 	sigma = {}
 	correlation_dict = {}

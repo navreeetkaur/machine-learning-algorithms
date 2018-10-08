@@ -5,202 +5,16 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-import Bayes,performanceAnalyser, Preprocessing
+import inputReader
+import Bayes
+import performanceAnalyser
+import Preprocessing
 import kmeans
 import KNN
 import Visualization
 import ROC
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
-
-class Classifier:
-	train_test_ratio = 0.8
-	dataset_folder = 'Datasets'	
-
-	def __init__(self,inputDataFileList,mode):
-		self.mode = mode
-		if mode == 0:
-			self.Train, self.Test, self.Label = self.collectInputMedical(inputDataFileList)
-		elif mode == 1:
-			self.Train, self.Test, self.Label = self.collectInputFashion(inputDataFileList)
-		else:
-			self.Train, self.Test, self.Label = self.collectInputRailway(inputDataFileList)
-
-	def collectInputMedical(self,inputDataFileList):
-		
-		labels = ['TEST1','TEST2','TEST3','Health']
-		num_labels = len(labels)
-		arrays = []
-
-		for k in range(len(inputDataFileList)):
-			file = inputDataFileList[k]
-			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
-				lines = inputFile.readlines()
-				lines = lines[1:]
-				num_records= len(lines)
-				arrays.append(np.zeros((num_records,num_labels),dtype=np.float64))
-				for i in range(num_records):
-					record = lines[i]
-					if record.strip() == '':
-						continue
-					record = record.strip().split(',')
-					for j in range(num_labels-1):
-						arrays[k][i][j] = float(record[j+1])
-					y_label = record[0]
-					if y_label == 'HEALTHY':
-						arrays[k][i][3] = 0
-					elif y_label == 'MEDICATION':
-						arrays[k][i][3] = 1
-					elif y_label == 'SURGERY':
-						arrays[k][i][3] = 2
-					if arrays[k][i][3] == -1:
-						print("Invalid treatment type detected at line "+int(index+2)+" in file "+str(k+1))
-						exit()
-
-		return arrays[0],arrays[1],labels
-
-
-	def collectInputFashion(self,inputDataFileList):
-
-		labels = ['pixel'+str(i+1) for i in range(784) ]
-		labels.append('Class')
-		num_labels = len(labels)
-		arrays = []
-
-		for k in range(len(inputDataFileList)):
-			file = inputDataFileList[k]
-			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
-				lines = inputFile.readlines()
-				lines = lines[1:]
-				num_records= len(lines)
-				arrays.append(np.zeros((num_records,num_labels),dtype=np.int))
-				for i in range(num_records):
-					record = lines[i]
-					if record.strip() == '':
-						continue
-					record = record.strip().split(',')
-					for j in range(num_labels-1):
-						arrays[k][i][j] = int(record[j+1])
-					arrays[k][i][num_labels-1] = int(record[0])
-
-		return arrays[0],arrays[1],labels
-
-
-	def collectInputRailway(self,inputDataFileList):
-		with open(inputDataFile,'r') as inputFile:
-			lines = inputFile.readlines()
-			lines = lines[1:]
-			labels = ['caseID','budget','memberCount','preferredClass','sex','age','ifBoarded']
-			num_labels = len(labels)
-			num_records= len(lines)
-			num_train = int(Classifier.train_test_ratio*num_records)
-			num_test = num_records - num_train
-			test_array = np.zeros((num_test,num_labels),dtype= np.int64)
-			train_array = np.zeros((num_train,num_labels),dtype=np.int64)
-			test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
-
-			i=0
-			for index in test_indices:
-				record = lines[index]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				
-				#Handling caseID
-				test_array[i][0] = int(record[0])
-				
-				#Handling budget
-				test_array[i][1] = int(record[2])
-				
-				#Handling memberCount
-				test_array[i][2] = int(record[3])
-				
-				#Handling preferredClass
-				if record[4] == 'FIRST_AC':
-					test_array[i][3] = 1
-				elif record[4] == 'SECOND_AC':
-					test_array[i][3] = 2
-				elif record[4] == 'THIRD_AC':
-					test_array[i][3] = 3
-				elif record[4] == 'NO_PREF':
-					test_array[i][3] = 4
-				else:
-					print(record[4])
-					print('Unknown preferredClass detected')
-					exit()
-
-				# Handling sex
-				if record[5] == 'male':
-					test_array[i][4] = 1
-				elif record[5] == 'female':
-					test_array[i][4] = 2
-				elif record[5] == '':
-					test_array[i][4] = 3
-				else:
-					print(record[5])
-					print('Unknown sex detected')
-					exit()
-
-				# Handling age
-				test_array[i][5] = int(record[6])
-
-				#Handling ifBoarded
-				test_array[i][6] = int(record[1])
-
-				i+=1
-
-			i=0
-			for index in range(num_records):
-				if index in test_indices:
-					continue
-				record = lines[index]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				#Handling caseID
-				train_array[i][0] = int(record[0])
-				
-				#Handling budget
-				train_array[i][1] = int(record[2])
-				
-				#Handling memberCount
-				train_array[i][2] = int(record[3])
-				
-				#Handling preferredClass
-				if record[4] == 'FIRST_AC':
-					train_array[i][3] = 1
-				elif record[4] == 'SECOND_AC':
-					train_array[i][3] = 2
-				elif record[4] == 'THIRD_AC':
-					train_array[i][3] = 3
-				elif record[4] == 'NO_PREF':
-					train_array[i][3] = 4
-				else:
-					print(record[4])
-					print('Unknown preferredClass detected')
-					exit()
-
-				# Handling sex
-				if record[5] == 'male':
-					train_array[i][4] = 1
-				elif record[5] == 'female':
-					train_array[i][4] = 2
-				elif record[5] == '':
-					train_array[i][4] = 3
-				else:
-					print(record[5])
-					print('Unknown sex detected')
-					exit()
-
-				# Handling age
-				train_array[i][5] = int(record[6])
-
-				#Handling ifBoarded
-				train_array[i][6] = int(record[1])
-
-				i+=1
-			return train_array,test_array,labels	
-
 
 def performPCA(inputDataClass,reduced_columns):
 	############################################## PCA Visualisation #############################################
@@ -215,11 +29,11 @@ def performPCA(inputDataClass,reduced_columns):
 	pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
 	reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
 	inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
-	print("train_data reduced. YAYAYAYA")
+	print("train_data reduced.")
 	print("Train data reduced to columns = "+str(reduced_train.shape[1]))
 	reduced_test = pca.reduce(inputDataClass.Test[:,:-1], False)
 	inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
-	print("test_data reduced. YAYAYAYA")
+	print("test_data reduced. ")
 	print("Test data reduced to columns = "+str(reduced_test.shape[1]))
 
 	### SKlearn PCA #####
@@ -241,12 +55,12 @@ def performVisualizations(inputDataClass):
 	########################################### Visualizations ###################################################
 	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
 
-	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
-	# Visualization.visualizeCorrelation(correlation_dict)
+	correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
+	Visualization.visualizeCorrelation(correlation_dict)
 
 	# Visualization.visualizeDataPoints(inputDataClass.Train)
 	# Visualization.comp_vs_var_accuracy()
-	pass
+	# pass
 
 def performBayes(inputDataClass, drawPrecisionRecall = False, drawConfusion = False):
 	"""################################# Bayes Classifier #############################################"""
@@ -338,7 +152,7 @@ def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)
 
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	
+
 
 if __name__ == '__main__': 
 	if len(sys.argv) < 2:
@@ -375,7 +189,9 @@ if __name__ == '__main__':
 		print("Unknown Dataset. Enter valid dataset.")
 		exit()
 
-	inputDataClass = Classifier(inputDataFile,mode)
+
+	train_test_ratio = 0.8
+	inputDataClass = inputReader.InputReader(inputDataFile,mode,train_test_ratio = train_test_ratio)
 
 	# Removes id from railway data
 	if mode == 2:
@@ -391,7 +207,7 @@ if __name__ == '__main__':
 	normalizeData(inputDataClass = inputDataClass)
 
 	"""################################# Visualization #############################################"""
-	# performVisualizations(inputDataClass = inputDataClass)
+	performVisualizations(inputDataClass = inputDataClass)
 
 	"""################################# Bayes #############################################"""
 	Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
