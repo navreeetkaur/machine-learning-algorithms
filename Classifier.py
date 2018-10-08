@@ -69,7 +69,7 @@ class Classifier:
 
 		for k in range(len(inputDataFileList)):
 			file = inputDataFileList[k]
-			with open(inputDataFileList[0],'r') as inputFile:
+			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
 				lines = inputFile.readlines()
 				lines = lines[1:]
 				num_records= len(lines)
@@ -202,6 +202,144 @@ class Classifier:
 			return train_array,test_array,labels	
 
 
+def performPCA(inputDataClass,reduced_columns):
+	############################################## PCA Visualisation #############################################
+	# #variance v/s n_components : Fashion MNIST
+	# start = 10
+	# stop = 500
+	# step = 15
+	# Visualization.var_vs_comp(inputDataClass.Train[:,:-1], start, stop, step)
+	########################################################### PCA #############################################
+
+	##### Our PCA ####
+	pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
+	reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
+	inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
+	print("train_data reduced. YAYAYAYA")
+	print("Train data reduced to columns = "+str(reduced_train.shape[1]))
+	reduced_test = pca.reduce(inputDataClass.Test[:,:-1], False)
+	inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
+	print("test_data reduced. YAYAYAYA")
+	print("Test data reduced to columns = "+str(reduced_test.shape[1]))
+
+	### SKlearn PCA #####
+	# pca = PCA(n_components=80,whiten=False)
+	# pca.fit(inputDataClass.Train[:,:-1])
+	# reduced_train = pca.transform(inputDataClass.Train[:,:-1])
+	# inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
+	# reduced_test = pca.transform(inputDataClass.Test[:,:-1])
+	# inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
+
+
+def normalizeData(inputDataClass):
+	######################################## Normalising Data ####################################
+	normalizer = Preprocessing.Normalise()
+	inputDataClass.Train = np.hstack((normalizer.scale(inputDataClass.Train[:,:-1],train=True),inputDataClass.Train[:,-1].reshape(-1,1)))
+	inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
+
+def performVisualizations(inputDataClass):
+	########################################### Visualizations ###################################################
+	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
+
+	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
+	# Visualization.visualizeCorrelation(correlation_dict)
+
+	# Visualization.visualizeDataPoints(inputDataClass.Train)
+	# Visualization.comp_vs_var_accuracy()
+	pass
+
+def performBayes(inputDataClass, drawPrecisionRecall = False, drawConfusion = False):
+	"""################################# Bayes Classifier #############################################"""
+
+	##Sklearn
+	# print("\nSklearn Naive Bayes")
+	# clf = GaussianNB()
+	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+
+	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	# Ytrue = inputDataClass.Train[:,-1]
+	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	# Ytrue = inputDataClass.Test[:,-1]
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+
+	print("\nMy Naive Bayes")
+	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	bayesClassifier.train(inputDataClass.Train)
+	print("Training of model done.")
+
+	Ypred = bayesClassifier.fit(inputDataClass.Train)
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	Ypred = bayesClassifier.fit(inputDataClass.Test)
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	print("Prediction done.")
+
+	if drawConfusion:
+		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+		Visualization.visualizeConfusion(confusion)
+
+	if drawPrecisionRecall:		
+		############################ precision-recall curve #############################
+		threshold = np.arange(0.9,0.1,-0.1)
+		probas = bayesClassifier.get_probas()
+		for dic in probas:
+			sums=0.0
+			for item in dic:
+				sums+=dic[item]
+			for item in dic:
+				dic[item] = dic[item]/sums
+		roc = ROC.Roc(Ytrue,probas,threshold,'')
+		roc.Roc_gen()
+
+		precision, recall, _ = precision_recall_curve(Ytrue, probas)
+
+		plt.step(recall, precision, color='b', alpha=0.2, where='post')
+		plt.fill_between(recall, precision, step='post', alpha=0.2,color='b')
+		plt.xlabel('Recall')
+		plt.ylabel('Precision')
+		plt.ylim([0.0, 1.05])
+		plt.xlim([0.0, 1.0])
+		plt.title('Precision Recall Curve')
+
+	return Ytrue,Ypred
+
+def performKMeans(inputDataClass,k,mode,num_runs,visualize=False):
+	covar = -1
+	if mode == 3:
+		covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
+	labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = num_runs, mode = mode,covar=covar)
+	print("rms = "+str(rms))
+	print("Kmeans done")
+
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	if visualize:
+		Visualization.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
+		print("Kmeans visualized")
+
+	return Ytrue,Ypred
+
+def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False):
+	covar=-1
+	if mode == 3:
+		covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
+	knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=label_with_distance, mode=mode, covar=covar)
+	knn.allocate()
+	Ypred = knn.labels
+	Ytrue = inputDataClass.Test[:,-1]
+
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+
+	
+
 if __name__ == '__main__': 
 	if len(sys.argv) < 2:
 		print("Invalid Format. Provide input file names")
@@ -238,7 +376,6 @@ if __name__ == '__main__':
 		exit()
 
 	inputDataClass = Classifier(inputDataFile,mode)
-	performanceAnalyser = performanceAnalyser.PerformanceCheck()
 
 	# Removes id from railway data
 	if mode == 2:
@@ -246,159 +383,35 @@ if __name__ == '__main__':
 		inputDataClass.Test = inputDataClass.Test[:,1:]
 
 	if mode == 1:
-		
-		############################################## Visualisation #############################################
-		# variance v/s n_components : Fashion MNIST
-		# start = 10
-		# stop = 500
-		# step = 15
-		# Visualization.var_vs_comp(inputDataClass.Train[:,:-1], start, stop, step)
-
-		########################################################### PCA #############################################
-
-		##### Our PCA ####
+		"""################################# PCA #############################################"""
 		reduced_columns = 80
-
-		pca = Preprocessing.PCA(inputDataClass.Train[:,:-1], k = reduced_columns, whiten = False)					##### Hyperparameter ####
-		reduced_train = pca.reduce(inputDataClass.Train[:,:-1], True)
-		inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
-		print("train_data reduced. YAYAYAYA")
-		print("Train data reduced to columns = "+str(reduced_train.shape[1]))
-		reduced_test = pca.reduce(inputDataClass.Test[:,:-1], False)
-		inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
-		print("test_data reduced. YAYAYAYA")
-		print("Test data reduced to columns = "+str(reduced_test.shape[1]))
-
-
-		### SKlearn PCA #####
-
-		# pca = PCA(n_components=80,whiten=False)
-		# pca.fit(inputDataClass.Train[:,:-1])
-		# reduced_train = pca.transform(inputDataClass.Train[:,:-1])
-		# inputDataClass.Train =  np.hstack((reduced_train,inputDataClass.Train[:,-1].reshape(-1,1)))
-		# reduced_test = pca.transform(inputDataClass.Test[:,:-1])
-		# inputDataClass.Test =  np.hstack((reduced_test,inputDataClass.Test[:,-1].reshape(-1,1)))
-
-
-	######################################## Normalising Data ####################################
-	# normalizer = Preprocessing.Normalise()
-	# inputDataClass.Train = np.hstack((normalizer.scale(inputDataClass.Train[:,:-1],train=True),inputDataClass.Train[:,-1].reshape(-1,1)))
-	# inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
-
-
-	########################################### Visualizations ###################################################
-	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
-
-
-	# correlation_dict = performanceAnalyser.getCorrelationMatrix(inputDataClass.Train)
-	# Visualization.visualizeCorrelation(correlation_dict)
-
-	# Visualization.visualizeDataPoints(inputDataClass.Train)
-	# Visualization.comp_vs_var_accuracy()
-
-	"""################################# Bayes Classifier #############################################"""
-
-	# #Sklearn
-	print("\nSklearn Naive Bayes")
-	clf = GaussianNB()
-	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
-
-	Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	Ytrue = inputDataClass.Train[:,-1]
-	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-	Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	Ytrue = inputDataClass.Test[:,-1]
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-
-	# print("\nMy Naive Bayes")
-	# bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	# # bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
-	# bayesClassifier.train(inputDataClass.Train)
-	# print("Training of model done. YAYAYYA")
-
-	# Ypred = bayesClassifier.fit(inputDataClass.Train)
-	# Ytrue = inputDataClass.Train[:,-1]
-	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-	# Ypred = bayesClassifier.fit(inputDataClass.Test)
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-
-	# print("Prediction done. YAYAYYA")
-
-	# confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
-	# Visualization.visualizeConfusion(confusion)
-	"""##############################################################################"""
-
+		performPCA(inputDataClass = inputDataClass, reduced_columns = reduced_columns)	
 	
-	############################ precision-recall curve #############################
-	# threshold = np.arange(0.9,0.1,-0.1)
-	# probas = bayesClassifier.get_probas()
-	# for dic in probas:
-	# 	sums=0.0
-	# 	for item in dic:
-	# 		sums+=dic[item]
-	# 	for item in dic:
-	# 		dic[item] = dic[item]/sums
-	# roc = ROC.Roc(Ytrue,probas,threshold,'')
-	# roc.Roc_gen()
+	"""################################# Normalisation #############################################"""
+	normalizeData(inputDataClass = inputDataClass)
 
-	# precision, recall, _ = precision_recall_curve(Ytrue, probas)
+	"""################################# Visualization #############################################"""
+	# performVisualizations(inputDataClass = inputDataClass)
 
-	# plt.step(recall, precision, color='b', alpha=0.2, where='post')
-	# plt.fill_between(recall, precision, step='post', alpha=0.2,color='b')
-	# plt.xlabel('Recall')
-	# plt.ylabel('Precision')
-	# plt.ylim([0.0, 1.05])
-	# plt.xlim([0.0, 1.0])
-	# plt.title('Precision Recall Curve')
-
+	"""################################# Bayes #############################################"""
+	Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
+	
 	"""################################# KMEANS #############################################"""
-
-	# k = 2					### Hyperparameter ###
-	# # mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev, 3: Mahalnobis}
-	# mode = 3
-	# covar = -1
-	# if mode == 3:
-	# 	covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
-	# labels, means, rms, Ypred = kmeans.kfit(inputDataClass.Train[:,:-1],k,inputDataClass.Train[:,-1],inputDataClass.Test[:,:-1],num_runs = 100, mode = mode,covar=covar)
-	# print(rms)
-	# print("Kmeans done")
-
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-
-	# Visualization.visualizeKMeans(inputDataClass.Train[:,:-1],labels,k)
-	# print("Kmeans visualized")
-
-	"""##############################################################################"""
-
+	# k = 3					### Hyperparameter ###
+	# mode = 0			# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev, 3: Mahalnobis}
+	# num_runs= 100
+	# Ytrue,Ypred = performKMeans(inputDataClass,k,mode,num_runs,visualize=False)
 
 	"""################################# KNN #############################################"""
 
-	# nearestNeighbours = 15	### Hyperparameter ###
-	# # mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
-	# mode = 3
-	# covar = -1
-	# if mode == 3:
-	# 	covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
-	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
-	# knn.allocate()
-	# Ypred = knn.labels
-	# Ytrue = inputDataClass.Test[:,-1]
-	# # print(Ytrue)
-	# # print(Ypred)
+	# nearestNeighbours = 15	### Hyperparameter ###	
+	# mode = 0		# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+	# performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)	
 
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
-
-	"""###################################################################################"""
-
+	"""###############################PRECISION-RECALL-F1##########################################"""
+	# print(Ytrue)
+	# print(Ypred)
 	precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
-
 	print("\nPrecision")
 	print(precision)
 	print("Recall")
