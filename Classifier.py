@@ -9,14 +9,14 @@ import Bayes,performanceAnalyser, Preprocessing
 import kmeans
 import KNN
 import Visualization
-
 import ROC
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
 class Classifier:
 	train_test_ratio = 0.8
-	# train_test_ratio = 1.0
+	dataset_folder = 'Datasets'	
+
 	def __init__(self,inputDataFileList,mode):
 		self.mode = mode
 		if mode == 0:
@@ -30,91 +30,60 @@ class Classifier:
 		
 		labels = ['TEST1','TEST2','TEST3','Health']
 		num_labels = len(labels)
+		arrays = []
 
-		with open(inputDataFileList[0],'r') as inputFile:
-			lines = inputFile.readlines()
-			lines = lines[1:]
-			num_records= len(lines)
-			train_array = np.zeros((num_records,num_labels),dtype=np.float64)
-			for i in range(num_records):
-				record = lines[i]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				for j in range(num_labels-1):
-					train_array[i][j] = float(record[j+1])
-				y_label = record[0]
-				if y_label == 'HEALTHY':
-					train_array[i][3] = 0
-				elif y_label == 'MEDICATION':
-					train_array[i][3] = 1
-				elif y_label == 'SURGERY':
-					train_array[i][3] = 2
-				if train_array[i][3] == -1:
-					print("Invalid treatment type detected at line "+int(index+2))
-					exit()
+		for k in range(len(inputDataFileList)):
+			file = inputDataFileList[k]
+			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
+				lines = inputFile.readlines()
+				lines = lines[1:]
+				num_records= len(lines)
+				arrays.append(np.zeros((num_records,num_labels),dtype=np.float64))
+				for i in range(num_records):
+					record = lines[i]
+					if record.strip() == '':
+						continue
+					record = record.strip().split(',')
+					for j in range(num_labels-1):
+						arrays[k][i][j] = float(record[j+1])
+					y_label = record[0]
+					if y_label == 'HEALTHY':
+						arrays[k][i][3] = 0
+					elif y_label == 'MEDICATION':
+						arrays[k][i][3] = 1
+					elif y_label == 'SURGERY':
+						arrays[k][i][3] = 2
+					if arrays[k][i][3] == -1:
+						print("Invalid treatment type detected at line "+int(index+2)+" in file "+str(k+1))
+						exit()
 
-		with open(inputDataFileList[1],'r') as inputFile:
-			lines = inputFile.readlines()
-			lines = lines[1:]
-			num_records= len(lines)
-			test_array = np.zeros((num_records,num_labels),dtype=np.float64)
-			for i in range(num_records):
-				record = lines[i]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				for j in range(num_labels-1):
-					test_array[i][j] = float(record[j+1])
-				y_label = record[0]
-				if y_label == 'HEALTHY':
-					test_array[i][3] = 0
-				elif y_label == 'MEDICATION':
-					test_array[i][3] = 1
-				elif y_label == 'SURGERY':
-					test_array[i][3] = 2
-				if test_array[i][3] == -1:
-					print("Invalid treatment type detected at line "+int(index+2))
-					exit()
-
-		return train_array,test_array,labels
+		return arrays[0],arrays[1],labels
 
 
 	def collectInputFashion(self,inputDataFileList):
-		# print(inputDataFileList)
-		# Loading training data
+
 		labels = ['pixel'+str(i+1) for i in range(784) ]
 		labels.append('Class')
 		num_labels = len(labels)
-		with open(inputDataFileList[0],'r') as inputFile:
-			lines = inputFile.readlines()
-			lines = lines[1:]
-			num_records= len(lines)
-			train_array = np.zeros((num_records,num_labels),dtype=np.int)
-			for i in range(num_records):
-				record = lines[i]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				for j in range(num_labels-1):
-					train_array[i][j] = int(record[j+1])
-				train_array[i][num_labels-1] = int(record[0])
+		arrays = []
 
-		with open(inputDataFileList[1],'r') as inputFile:
-			lines = inputFile.readlines()
-			lines = lines[1:]
-			num_records= len(lines)
-			test_array = np.zeros((num_records,num_labels),dtype=np.int)
-			for i in range(num_records):
-				record = lines[i]
-				if record.strip() == '':
-					continue
-				record = record.strip().split(',')
-				for j in range(num_labels-1):
-					test_array[i][j] = int(record[j+1])
-				test_array[i][num_labels-1] = int(record[0])
+		for k in range(len(inputDataFileList)):
+			file = inputDataFileList[k]
+			with open(inputDataFileList[0],'r') as inputFile:
+				lines = inputFile.readlines()
+				lines = lines[1:]
+				num_records= len(lines)
+				arrays.append(np.zeros((num_records,num_labels),dtype=np.int))
+				for i in range(num_records):
+					record = lines[i]
+					if record.strip() == '':
+						continue
+					record = record.strip().split(',')
+					for j in range(num_labels-1):
+						arrays[k][i][j] = int(record[j+1])
+					arrays[k][i][num_labels-1] = int(record[0])
 
-		return train_array,test_array,labels
+		return arrays[0],arrays[1],labels
 
 
 	def collectInputRailway(self,inputDataFileList):
@@ -238,7 +207,7 @@ if __name__ == '__main__':
 		print("Invalid Format. Provide input file names")
 		exit()
 	inputDataFile = sys.argv[1]
-	""" Fashion MNIST has separate files for training and test """
+	
 	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway
 
 	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking'}
@@ -269,6 +238,12 @@ if __name__ == '__main__':
 		exit()
 
 	inputDataClass = Classifier(inputDataFile,mode)
+	performanceAnalyser = performanceAnalyser.PerformanceCheck()
+
+	# Removes id from railway data
+	if mode == 2:
+		inputDataClass.Train = inputDataClass.Train[:,1:]
+		inputDataClass.Test = inputDataClass.Test[:,1:]
 
 	if mode == 1:
 		
@@ -311,9 +286,7 @@ if __name__ == '__main__':
 	# inputDataClass.Test = np.hstack((normalizer.scale(inputDataClass.Test[:,:-1],train=False),inputDataClass.Test[:,-1].reshape(-1,1)))
 
 
-	##############################################################################################
-
-	performanceAnalyser = performanceAnalyser.PerformanceCheck()
+	########################################### Visualizations ###################################################
 	# Visualization.visualizeDataCCD(np.vstack((inputDataClass.Train,inputDataClass.Test)))
 
 
@@ -326,17 +299,17 @@ if __name__ == '__main__':
 	"""################################# Bayes Classifier #############################################"""
 
 	# #Sklearn
-	# print("\nSklearn Naive Bayes")
-	# clf = GaussianNB()
-	# clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
+	print("\nSklearn Naive Bayes")
+	clf = GaussianNB()
+	clf.fit(inputDataClass.Train[:,:-1], inputDataClass.Train[:,-1])
 
-	# Ypred = clf.predict(inputDataClass.Train[:,:-1])
-	# Ytrue = inputDataClass.Train[:,-1]
-	# print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Train[:,:-1])
+	Ytrue = inputDataClass.Train[:,-1]
+	print("Training Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
-	# Ypred = clf.predict(inputDataClass.Test[:,:-1])
-	# Ytrue = inputDataClass.Test[:,-1]
-	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	Ypred = clf.predict(inputDataClass.Test[:,:-1])
+	Ytrue = inputDataClass.Test[:,-1]
+	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 
 	# print("\nMy Naive Bayes")
@@ -383,9 +356,6 @@ if __name__ == '__main__':
 	# plt.xlim([0.0, 1.0])
 	# plt.title('Precision Recall Curve')
 
-	inputDataClass.Train = inputDataClass.Train[:,1:]
-	inputDataClass.Test = inputDataClass.Test[:,1:]
-
 	"""################################# KMEANS #############################################"""
 
 	# k = 2					### Hyperparameter ###
@@ -410,20 +380,20 @@ if __name__ == '__main__':
 
 	"""################################# KNN #############################################"""
 
-	nearestNeighbours = 15	### Hyperparameter ###
-	# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
-	mode = 3
-	covar = -1
-	if mode == 3:
-		covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
-	knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
-	knn.allocate()
-	Ypred = knn.labels
-	Ytrue = inputDataClass.Test[:,-1]
-	# print(Ytrue)
-	# print(Ypred)
+	# nearestNeighbours = 15	### Hyperparameter ###
+	# # mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev}
+	# mode = 3
+	# covar = -1
+	# if mode == 3:
+	# 	covar = performanceAnalyser.getFullCovariance(inputDataClass.Train[:,:-1])
+	# knn = KNN.KNN(nearestNeighbours,inputDataClass.Train[:,:-1],inputDataClass.Test[:,:-1],inputDataClass.Train[:,-1],label_with_distance=False, mode=mode, covar=covar)
+	# knn.allocate()
+	# Ypred = knn.labels
+	# Ytrue = inputDataClass.Test[:,-1]
+	# # print(Ytrue)
+	# # print(Ypred)
 
-	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	# print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 
 	"""###################################################################################"""
 
