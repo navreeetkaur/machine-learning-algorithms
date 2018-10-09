@@ -80,8 +80,8 @@ def performBayes(inputDataClass, drawPrecisionRecall = False, drawConfusion = Fa
 
 
 	print("\nMy Naive Bayes")
-	bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
-	# bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[-1,0,0,1,1,0])
+	# bayesClassifier = Bayes.Bayes(isNaive = False, distribution =[0 for i in range(inputDataClass.Train.shape[1]-1)])
+	bayesClassifier = Bayes.Bayes(isNaive = True, distribution =[0,0,1,1,0])
 	bayesClassifier.train(inputDataClass.Train)
 	print("Training of model done.")
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 	
 	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway
 
-	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking'}
+	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking', 3:'River Data'}
 
 	if inputDataFile == 'Medical_data.csv':
 		mode = 0
@@ -184,6 +184,8 @@ if __name__ == '__main__':
 		inputDataFile = x
 	elif inputDataFile == 'railwayBookingList.csv':
 		mode = 2
+	elif inputDataFile == 'river_data.csv':
+		mode =3
 
 	if mode==-1:
 		print("Unknown Dataset. Enter valid dataset.")
@@ -204,10 +206,10 @@ if __name__ == '__main__':
 		performPCA(inputDataClass = inputDataClass, reduced_columns = reduced_columns)	
 	
 	"""################################# Normalisation #############################################"""
-	normalizeData(inputDataClass = inputDataClass)
+	# normalizeData(inputDataClass = inputDataClass)
 
 	"""################################# Visualization #############################################"""
-	performVisualizations(inputDataClass = inputDataClass)
+	# performVisualizations(inputDataClass = inputDataClass)
 
 	"""################################# Bayes #############################################"""
 	Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)

@@ -10,8 +10,10 @@ class InputReader:
 			self.Train, self.Test, self.Label = self.collectInputMedical(inputDataFileList)
 		elif mode == 1:
 			self.Train, self.Test, self.Label = self.collectInputFashion(inputDataFileList)
-		else:
+		elif mode == 2:
 			self.Train, self.Test, self.Label = self.collectInputRailway(inputDataFileList)
+		else:
+			self.Train, self.Test, self.Label = self.collectInputRiver(inputDataFileList)
 
 	def collectInputMedical(self,inputDataFileList):
 		
@@ -74,13 +76,13 @@ class InputReader:
 
 
 	def collectInputRailway(self,inputDataFileList):
-		with open(inputDataFile,'r') as inputFile:
+		with open(str(self.dataset_folder+'/'+ inputDataFileList),'r') as inputFile:
 			lines = inputFile.readlines()
 			lines = lines[1:]
 			labels = ['caseID','budget','memberCount','preferredClass','sex','age','ifBoarded']
 			num_labels = len(labels)
 			num_records= len(lines)
-			num_train = int(Classifier.train_test_ratio*num_records)
+			num_train = int(self.train_test_ratio*num_records)
 			num_test = num_records - num_train
 			test_array = np.zeros((num_test,num_labels),dtype= np.int64)
 			train_array = np.zeros((num_train,num_labels),dtype=np.int64)
@@ -186,4 +188,44 @@ class InputReader:
 				train_array[i][6] = int(record[1])
 
 				i+=1
-			return train_array,test_array,labels	
+		return train_array,test_array,labels	
+
+	def collectInputRiver(self,inputDataFileList):
+		with open(str(self.dataset_folder+'/'+ inputDataFileList),'r') as inputFile:
+			lines = inputFile.readlines()
+			lines = lines[1:]
+			labels = ['x','Levels']
+			num_labels = len(labels)
+			num_records= len(lines)
+			num_train = int(self.train_test_ratio*num_records)
+			num_test = num_records - num_train
+			test_array = np.zeros((num_test,num_labels),dtype= np.float64)
+			train_array = np.zeros((num_train,num_labels),dtype=np.float64)
+			test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
+
+			i=0
+			for index in test_indices:
+				record = lines[index]
+				if record.strip() == '':
+					continue
+				record = record.strip().split(',')				
+				#Handling x
+				test_array[i][0] = float(record[0])
+				#Handling O2 level
+				test_array[i][1] = float(record[1])
+				i+=1
+
+			i=0
+			for index in range(num_records):
+				if index in test_indices:
+					continue
+				record = lines[index]
+				if record.strip() == '':
+					continue
+				record = record.strip().split(',')
+				#Handling x
+				test_array[i][0] = float(record[0])
+				#Handling O2 level
+				test_array[i][1] = float(record[1])
+				i+=1
+		return train_array,test_array,labels
