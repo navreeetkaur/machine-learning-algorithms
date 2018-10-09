@@ -151,15 +151,3 @@ class PCA(object):
 		# un-scale
 		X = np.multiply(X, self.scale_sigma)
 		X = np.add(X, self.scale_mean)
-
-
-
-
-
-
-
-	
-
-
-
-

@@ -224,8 +224,8 @@ class InputReader:
 					continue
 				record = record.strip().split(',')
 				#Handling x
-				test_array[i][0] = float(record[0])
+				train_array[i][0] = float(record[0])
 				#Handling O2 level
-				test_array[i][1] = float(record[1])
+				train_array[i][1] = float(record[1])
 				i+=1
 		return train_array,test_array,labels

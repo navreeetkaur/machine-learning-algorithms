@@ -2,6 +2,13 @@ import numpy as np
 import math
 import Visualization
 
+def calcRootMeanSquareRegression(Ypred,Ytrue):
+	diff = Ytrue-Ypred
+	sq = np.square(diff)
+	mse= np.sum(sq)
+	# print(mse)
+	return (mse/len(Ypred))**0.5
+
 def calcAccuracyTotal(Ypred,Ytrue):
 	tot = len(Ypred)
 	correct = 0
@@ -82,10 +89,3 @@ def getFullCovariance(X):
 	sigma = np.matmul(X.transpose(),X)
 	sigma = sigma *1.0/total_pnts
 	return sigma
-
-
-
-
-
-
-
