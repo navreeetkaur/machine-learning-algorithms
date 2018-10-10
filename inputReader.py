@@ -188,6 +188,10 @@ class InputReader:
 				train_array[i][6] = int(record[1])
 
 				i+=1
+
+		train_array = train_array[:,1:]
+		test_array = test_array[:,1:]
+		labels =  labels[1:]
 		return train_array,test_array,labels	
 
 	def collectInputRiver(self,inputDataFileList):

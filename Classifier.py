@@ -13,6 +13,7 @@ import kmeans
 import KNN
 import Visualization
 import ROC
+import linearModels
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
@@ -149,9 +150,21 @@ def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)
 	knn.allocate()
 	Ypred = knn.labels
 	Ytrue = inputDataClass.Test[:,-1]
-
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
+	return Ytrue,Ypred
 
+def performLinearModels(inputDataClass, phiMode, maxDegree, isRegularized, lambd, isRegress = False):
+	linear_model = linearModels.LinearModels(phiMode,maxDegree,isRegularized,lambd)
+	linear_model.train(inputDataClass.Train)
+	Ypred = linear_model.test(inputDataClass.Test[:,:-1], isRegress)
+	Ytrue = inputDataClass.Test[:,-1]
+	if isRegress:
+		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
+		print("Linear model rms "+str(rms))
+	if not isRegress:
+		acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+		print("Linear model Accuracy "+str(acc))
+	return Ytrue,Ypred
 
 
 if __name__ == '__main__': 
@@ -195,24 +208,23 @@ if __name__ == '__main__':
 	train_test_ratio = 0.8
 	inputDataClass = inputReader.InputReader(inputDataFile,mode,train_test_ratio = train_test_ratio)
 
-	# Removes id from railway data
-	if mode == 2:
-		inputDataClass.Train = inputDataClass.Train[:,1:]
-		inputDataClass.Test = inputDataClass.Test[:,1:]
-
 	if mode == 1:
 		"""################################# PCA #############################################"""
 		reduced_columns = 80
 		performPCA(inputDataClass = inputDataClass, reduced_columns = reduced_columns)	
 	
 	"""################################# Normalisation #############################################"""
-	# normalizeData(inputDataClass = inputDataClass)
+	normalizeData(inputDataClass = inputDataClass)
 
 	"""################################# Visualization #############################################"""
 	# performVisualizations(inputDataClass = inputDataClass)
 
 	"""################################# Bayes #############################################"""
-	Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
+	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
+
+	"""################################# Linear Models #############################################"""
+	# PHIMODE => 0 : Projection ;;; 1 : 1,x,x2 (Add maxDegree)
+	Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, phiMode=0, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
 	
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###
@@ -229,10 +241,10 @@ if __name__ == '__main__':
 	"""###############################PRECISION-RECALL-F1##########################################"""
 	# print(Ytrue)
 	# print(Ypred)
-	precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
-	print("\nPrecision")
-	print(precision)
-	print("Recall")
-	print(recall)
-	print("F1 Score")
-	print(f1score)
+	# precision,recall, f1score = performanceAnalyser.goodness(Ytrue,Ypred)
+	# print("\nPrecision")
+	# print(precision)
+	# print("Recall")
+	# print(recall)
+	# print("F1 Score")
+	# print(f1score)
