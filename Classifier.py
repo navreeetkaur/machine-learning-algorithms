@@ -229,7 +229,7 @@ if __name__ == '__main__':
 	"""################################# Linear Models #############################################"""
 	# PHIMODE => 0 : Projection ;;; 1 : 1,x,x2 (Add maxDegree)
 	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, phiMode=0, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
-	performMultiClassLinear(inputDataClass = inputDataClass, phiMode = 0, maxDegree = 1, learnRate = 0.1)
+	performMultiClassLinear(inputDataClass = inputDataClass, phiMode = 0, maxDegree = 1, learnRate = 0.1, isRegularized = True, lambd = 0.1)
 	
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###

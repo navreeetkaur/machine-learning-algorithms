@@ -72,11 +72,13 @@ class MultiClassLinear:
 
 	phiDict = {0: 'Projection', 1: 'Polynomial Basis'}
 
-	def __init__(self,phiMode,maxDegree, learnRate):
+	def __init__(self,phiMode,maxDegree, learnRate,isRegularized, lambd):
 		self.phiMode = phiMode			# 0 : Projection ;; 1 : 1,x,x2
 		self.learnRate = learnRate
 		self.maxDegree = maxDegree
 		self.parameters = []
+		self.isRegularized = isRegularized
+		self.lambd = lambd
 
 	def train(self,train_data):
 		sliced_matrix = Visualization.sliceMatrix(train_data)
@@ -90,7 +92,7 @@ class MultiClassLinear:
 		self.parameters = self.performGradientDescent(parameters,features,yOneShot)
 
 	def performGradientDescent(self,theta,X,Y):
-		for k in range(1):
+		for k in range(5):
 			# print(k)
 			for i in range(X.shape[0]):
 			# for i in range(10):
@@ -103,10 +105,10 @@ class MultiClassLinear:
 					exit()
 
 				for j in range(theta.shape[0]):
-					theta[j] = theta[j] - self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]
+					theta[j] = (1-self.learnRate*self.lambd)*theta[j] - self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]
 				# print(theta)
 				
-		print(theta)
+		# print(theta)
 		return theta
 
 	def test(self,test_data):
