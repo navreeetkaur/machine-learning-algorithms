@@ -1,5 +1,6 @@
 import inputReader
 import performanceAnalyser
+import Visualization
 
 import numpy as np 
 
@@ -65,3 +66,58 @@ class LinearModels:
 		if not isRegress:
 			YpredClassify = (Ypred > 0.5).astype(np.int)
 			return YpredClassify
+	
+
+class MultiClassLinear:
+
+	phiDict = {0: 'Projection', 1: 'Polynomial Basis'}
+
+	def __init__(self,phiMode,maxDegree, learnRate):
+		self.phiMode = phiMode			# 0 : Projection ;; 1 : 1,x,x2
+		self.learnRate = learnRate
+		self.maxDegree = maxDegree
+		self.parameters = []
+
+	def train(self,train_data):
+		sliced_matrix = Visualization.sliceMatrix(train_data)
+		num_labels = len(sliced_matrix)
+		features = train_data[:,:-1]
+		yOneShot = np.zeros((features.shape[0],num_labels),dtype=np.int)
+		for i in range(train_data.shape[0]):
+			yOneShot[int(train_data[i][-1])] = 1
+		parameters = np.random.rand(num_labels,features.shape[1])
+		# print(parameters)
+		self.parameters = self.performGradientDescent(parameters,features,yOneShot)
+
+	def performGradientDescent(self,theta,X,Y):
+		for k in range(1):
+			# print(k)
+			for i in range(X.shape[0]):
+			# for i in range(10):
+				z=0
+				for j in range(theta.shape[0]):
+					z+= X[i].dot(theta[j])
+				print(z)
+				if z==0:
+					print(theta)
+					exit()
+
+				for j in range(theta.shape[0]):
+					theta[j] = theta[j] - self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]
+				# print(theta)
+				
+		print(theta)
+		return theta
+
+	def test(self,test_data):
+		Ypred = np.zeros(test_data.shape[0],)
+		for i in range(test_data.shape[0]):
+			vals = np.matmul(self.parameters,test_data[i].reshape(-1,1))
+			vals = vals.transpose()[0]
+			print(test_data[i])
+			print(vals)
+			exit()
+
+
+
+

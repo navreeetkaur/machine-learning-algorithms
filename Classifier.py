@@ -166,6 +166,10 @@ def performLinearModels(inputDataClass, phiMode, maxDegree, isRegularized, lambd
 		print("Linear model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
+def performMultiClassLinear(inputDataClass,phiMode,maxDegree,learnRate):
+	multi_class_linear_model = linearModels.MultiClassLinear(phiMode,maxDegree,learnRate)
+	multi_class_linear_model.train(inputDataClass.Train)
+	Ypred = multi_class_linear_model.test(inputDataClass.Test[:,:-1])
 
 if __name__ == '__main__': 
 	if len(sys.argv) < 2:
@@ -224,7 +228,8 @@ if __name__ == '__main__':
 
 	"""################################# Linear Models #############################################"""
 	# PHIMODE => 0 : Projection ;;; 1 : 1,x,x2 (Add maxDegree)
-	Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, phiMode=0, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
+	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, phiMode=0, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
+	performMultiClassLinear(inputDataClass = inputDataClass, phiMode = 0, maxDegree = 1, learnRate = 0.1)
 	
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###
