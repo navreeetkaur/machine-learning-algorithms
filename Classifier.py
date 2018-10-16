@@ -13,7 +13,7 @@ import kmeans
 import KNN
 import Visualization
 import ROC
-import linearModels
+import linearLogisticModels
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
@@ -153,8 +153,8 @@ def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 	return Ytrue,Ypred
 
-def performLinearModels(inputDataClass, phiMode, maxDegree, isRegularized, lambd, isRegress = False):
-	linear_model = linearModels.LinearModels(phiMode,maxDegree,isRegularized,lambd)
+def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegress = False):
+	linear_model = linearLogisticModels.LinearModels(maxDegree,isRegularized,lambd)
 	linear_model.train(inputDataClass.Train)
 	Ypred = linear_model.test(inputDataClass.Test[:,:-1], isRegress)
 	Ytrue = inputDataClass.Test[:,-1]
@@ -166,10 +166,24 @@ def performLinearModels(inputDataClass, phiMode, maxDegree, isRegularized, lambd
 		print("Linear model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
-def performMultiClassLinear(inputDataClass,phiMode,maxDegree,learnRate):
-	multi_class_linear_model = linearModels.MultiClassLinear(phiMode,maxDegree,learnRate)
+def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , lambd ):
+	multi_class_linear_model = linearLogisticModels.MultiClassLinear(maxDegree,learnRate,isRegularized,lambd)
 	multi_class_linear_model.train(inputDataClass.Train)
+	Ytrue = inputDataClass.Test[:,-1]
 	Ypred = multi_class_linear_model.test(inputDataClass.Test[:,:-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Multi Class Linear model Accuracy "+str(acc))
+	return Ytrue,Ypred
+
+def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold ):
+	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold)
+	logistic_model.train(inputDataClass.Train)
+	Ytrue = inputDataClass.Test[:,-1]
+	Ypred = multi_class_linear_model.test(inputDataClass.Test[:,:-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Logistic model Accuracy "+str(acc))
+	return Ytrue,Ypred
+
 
 if __name__ == '__main__': 
 	if len(sys.argv) < 2:
@@ -227,10 +241,12 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
 
 	"""################################# Linear Models #############################################"""
-	# PHIMODE => 0 : Projection ;;; 1 : 1,x,x2 (Add maxDegree)
-	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, phiMode=0, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
-	performMultiClassLinear(inputDataClass = inputDataClass, phiMode = 0, maxDegree = 1, learnRate = 0.1, isRegularized = True, lambd = 0.1)
-	
+	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
+	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
+
+	"""################################# Logisitic Models #############################################"""
+	Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.01)
+
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###
 	# mode = 0			# mode = {0 : Euclidean, 1: Manhattan, 2 : Chebyshev, 3: Mahalnobis}
