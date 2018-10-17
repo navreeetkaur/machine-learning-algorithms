@@ -9,6 +9,20 @@ def calcRootMeanSquareRegression(Ypred,Ytrue):
 	# print(mse)
 	return (mse/len(Ypred))**0.5
 
+
+def MSE(Ypred,Ytrue):
+	diff = Ytrue-Ypred
+	sq = np.square(diff)
+	mse= np.sum(sq)/(len(Ypred)*1.0)
+	return mse
+	
+def R2(Ypred, Ytrue):
+	mse = MSE(Ypred, Ytrue)
+	var = np.var(np.asarray(Ytrue))
+	r2 = 1 - (mse/(var*1.0))
+	return mse, r2
+
+
 def calcAccuracyTotal(Ypred,Ytrue):
 	tot = len(Ypred)
 	correct = 0
