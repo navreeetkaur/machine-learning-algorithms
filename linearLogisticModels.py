@@ -59,8 +59,6 @@ class LinearModels:
 
 class MultiClassLinear:
 
-	phiDict = {0: 'Projection', 1: 'Polynomial Basis'}
-
 	def __init__(self,maxDegree, learnRate,isRegularized, lambd):
 		self.learnRate = learnRate
 		self.maxDegree = maxDegree
@@ -103,27 +101,30 @@ class MultiClassLinear:
 		return W.transpose()
 
 
-	def performGradientDescent(self,theta,X,Y):
-		for k in range(1):
-			print(k)
-			# print(X.shape[0])
-			for i in range(X.shape[0]):
-				z=0
-				for j in range(theta.shape[0]):
-					z+= X[i].dot(theta[j])
-				# print(z)
-				if z==0:
-					print("z=0 at i "+str(i))
-					print(X[i])
-					print(theta)
-					exit()
+	# def performGradientDescent(self,theta,X,Y):
+	# 	for k in range(1):
+	# 		print(k)
+	# 		# print(X.shape[0])
+	# 		for i in range(X.shape[0]):
+	# 			z=0
+	# 			for j in range(theta.shape[0]):
+	# 				z+= X[i].dot(theta[j])
+	# 			# print(z)
+	# 			if z==0:
+	# 				print("z=0 at i "+str(i))
+	# 				print(X[i])
+	# 				print(theta)
+	# 				exit()
 
-				for j in range(theta.shape[0]):
-					theta[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
-				# print(theta)
+	# 			for j in range(theta.shape[0]):
+	# 				if self.isRegularized:
+	# 					theta[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
+	# 				else:
+	# 					theta[j] = theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
+	# 			# print(theta)
 				
-		print(theta)
-		return theta
+	# 	print(theta)
+	# 	return theta
 
 	def test(self,test_data):
 		Ypred = np.zeros(test_data.shape[0])
@@ -134,15 +135,15 @@ class MultiClassLinear:
 			Ypred[i] = np.argmax(vals)
 		return Ypred
 
-
-
 class LogisticModels:
 
-	def __init__(self,maxDegree, learnRate,GDthreshold):
+	def __init__(self,maxDegree, learnRate,GDthreshold,isRegularized, lambd):
 		self.learnRate = learnRate
 		self.W = []
 		self.maxDegree = maxDegree
 		self.GDthreshold = GDthreshold
+		self.isRegularized = isRegularized
+		self.lambd = lambd
 
 	def train(self,train_data):
 		X = train_data[:,:-1]
@@ -153,14 +154,21 @@ class LogisticModels:
 	def calcW(self,phiX,Y):
 		W = np.random.rand(phiX.shape[1])
 		while True:
+			# print(W)
 			z = np.zeros(phiX.shape[1])
 			for i in range(phiX.shape[0]):
 				wTx = W.dot(phiX[i])
-				print(wTx)
-				z += (Y[i] + (math.exp(-wTx)/(1+math.exp(-wTx))))*phiX[i]
-			correction = self.learnRate*z
-			W = W +correction
-			if np.max(correction) < self.GDthreshold:
+				# print(wTx)
+				z += (Y[i] - (math.exp(-wTx)/(1+math.exp(-wTx))))*phiX[i]
+				# z += (Y[i] - 1/(1+np.exp(-wTx)))*phiX[i]
+			if self.isRegularized:
+				correction = self.learnRate*z + self.learnRate*self.lambd*W
+			else:
+				correction = self.learnRate*z
+			W = W -correction
+			maxx = math.fabs(np.max(correction))
+			# print(maxx)
+			if  maxx < self.GDthreshold:
 				return W
 
 	def test(self,test_data):
@@ -174,5 +182,53 @@ class LogisticModels:
 		return Ypred
 
 
+class MultiClassLogistic:
+	
+	def __init__(self,maxDegree, learnRate, GDthreshold,isRegularized, lambd):
+		self.learnRate = learnRate
+		self.maxDegree = maxDegree
+		self.parameters = []
+		self.isRegularized = isRegularized
+		self.lambd = lambd
+		self.GDthreshold = GDthreshold
 
-		
+	def train(self,train_data):
+		phiX = calcPhiX(train_data[:,:-1],self.maxDegree)
+		sliced_matrix = Visualization.sliceMatrix(train_data)
+		num_labels = len(sliced_matrix)
+		yOneShot = np.zeros((phiX.shape[0],num_labels),dtype=np.int)
+		for i in range(train_data.shape[0]):
+			yOneShot[i][int(train_data[i][-1])] = 1
+
+		parameters = np.random.rand(num_labels,phiX.shape[1])
+		self.parameters = self.performGradientDescent(parameters,phiX,yOneShot)
+
+	def performGradientDescent(self,theta,X,Y):
+		thetaNew = np.copy(theta)
+		while True:
+			# print(X.shape[0])
+			for i in range(X.shape[0]):
+				z=0
+				for j in range(thetaNew.shape[0]):
+					z+= np.exp(X[i].dot(thetaNew[j]))
+
+				for j in range(thetaNew.shape[0]):
+					if self.isRegularized:
+						thetaNew[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*thetaNew[j] + self.learnRate* (Y[i][j] - (thetaNew[j].dot(X[i]))/z)*X[i]/z
+					else:
+						thetaNew[j] = thetaNew[j] + self.learnRate* (Y[i][j] - np.exp(thetaNew[j].dot(X[i]))/z)*np.exp(thetaNew[j].dot(X[i]))*X[i]/z
+
+			if np.max(np.absolute(thetaNew-theta)) < self.GDthreshold:
+				return thetaNew
+			else:
+				theta = thetaNew
+
+
+	def test(self,test_data):
+		Ypred = np.zeros(test_data.shape[0])
+		phiX = calcPhiX(test_data,self.maxDegree)
+		for i in range(test_data.shape[0]):
+			vals = np.matmul(self.parameters,phiX[i].reshape(-1,1))
+			vals = vals.transpose()[0]
+			Ypred[i] = np.argmax(vals)
+		return Ypred
