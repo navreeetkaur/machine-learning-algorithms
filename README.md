@@ -11,7 +11,7 @@ We have implemented following types of Classification schemes for each problem
 4. K-Nearest Neighbor Classifier
 5. Principal component analysis (where ever applicable)
 6. Linear Models for Binary Classification, Regression and Multi-Class Classification
-7. Logistic Models for Binary Classification, Regression and Multi-Class Classification
+7. Logistic Models for Binary and Multi-Class Classification
 8. Binary and Multi-Class FLDA  
 9. Perceptron ALgorithm 
 10. Support Vector Machine
