@@ -171,7 +171,7 @@ def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegre
 	if not isRegress:
 		Ypred = (Ypred > 0.5).astype(np.int)
 		acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
-		print("Linear model Accuracy "+str(acc))
+		print("Linear model Accuracy (Scikit-learn)"+str(acc))
 
 	# Our implementation
 	linear_model = linearLogisticModels.LinearModels(maxDegree,isRegularized,lambd)
@@ -201,8 +201,6 @@ def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,is
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
-	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold, isRegularized, lambd)
-	logistic_model.train(train_data)
 
 	# Scikit Learn
 	clf = LogisticRegression().fit(train_data[:,:-1], train_data[:,-1])
@@ -211,6 +209,8 @@ def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,is
 	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
 
 	# Our implementation
+	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold, isRegularized, lambd)
+	logistic_model.train(train_data)
 	Ypred = logistic_model.test(test_data[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy "+str(acc))
@@ -220,8 +220,6 @@ def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, i
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
-	multi_class_logistic_model = linearLogisticModels.MultiClassLogistic(maxDegree,learnRate, GDthreshold,isRegularized,lambd)
-	multi_class_logistic_model.train(train_data)
 
 	clf = LogisticRegression(solver='lbfgs',multi_class='multinomial').fit(train_data[:,:-1], train_data[:,-1])
 	Ypred = clf.predict(test_data[:, :-1])
@@ -229,6 +227,8 @@ def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, i
 	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
 
 	#Our implementation
+	multi_class_logistic_model = linearLogisticModels.MultiClassLogistic(maxDegree,learnRate, GDthreshold,isRegularized,lambd)
+	multi_class_logistic_model.train(train_data)
 	Ypred = multi_class_logistic_model.test(inputDataClass.Test[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Multi Class Logistic model Accuracy "+str(acc))
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 		exit()
 	inputDataFile = sys.argv[1]
 	
-	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway
+	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway; 3 for river data
 
 	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking', 3:'River Data'}
 
@@ -312,15 +312,15 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
 
 	"""################################# Linear Models #############################################"""
-	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = False, lambd = 1, isRegress = True)
-	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
+	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = True, lambd = 0.1, isRegress = False)
+	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = i, learnRate = 0.01, isRegularized = True, lambd = 10**j)
 
 	"""################################# Logistic Models #############################################"""
-	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = False, lambd = 0.001)
-	# Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 0.01)
+	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = i, learnRate = 0.001, GDthreshold = 0.01, isRegularized = True, lambd = 10**j)
+	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 0.01)
 
 	"""################################# Perceptron #############################################"""
-	Ytrue,Ypred = performPerceptron(inputDataClass = inputDataClass, numIter = 1000, isBinary = False)
+	# Ytrue,Ypred = performPerceptron(inputDataClass = inputDataClass, numIter = 1000, isBinary = False)
 
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###

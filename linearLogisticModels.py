@@ -91,11 +91,14 @@ class MultiClassLinear:
 			yOneShot[i][int(train_data[i][-1])] = 1
 
 		self.parameters = self.calcW(phiX,yOneShot)
-		print(self.parameters)
+		# print(self.parameters)
 
 	def calcW(self,phiX,Y):
 		phiTrans = phiX.transpose()
-		phiTransPhiPlusLambdInv = np.linalg.inv(np.matmul(phiTrans,phiX) + self.lambd * np.identity(phiX.shape[1]))
+		if self.isRegularized:
+			phiTransPhiPlusLambdInv = np.linalg.inv(np.matmul(phiTrans,phiX) + self.lambd * np.identity(phiX.shape[1]))
+		else:
+			phiTransPhiPlusLambdInv = np.linalg.inv(np.matmul(phiTrans,phiX))
 		moore_penrose = np.matmul(phiTransPhiPlusLambdInv,phiTrans)
 		W = np.matmul(moore_penrose,Y)
 		return W.transpose()

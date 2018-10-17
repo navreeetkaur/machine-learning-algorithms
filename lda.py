@@ -212,10 +212,3 @@ if __name__ == '__main__':
 	precision, recall, f1score = performanceAnalyser.goodness(Y_true, Y_pred)
 	confMat = performanceAnalyser.getConfusionMatrix(Y_true,Y_pred)
 	print(f'Accuracy:{acc}\n Precision:{precision}\n Recall:{recall}\n F1score:{f1score}\n Confusion Matrix:{confMat}\n')
-
-	
-
-	
-
-
-
