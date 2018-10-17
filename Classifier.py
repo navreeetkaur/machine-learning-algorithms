@@ -5,6 +5,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
 
 import inputReader
 import Bayes
@@ -15,6 +17,7 @@ import KNN
 import Visualization
 import ROC
 import linearLogisticModels
+import perceptron
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
@@ -160,12 +163,15 @@ def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegre
 	Ytrue = test_data[:,-1]
 
 	# Scikit-learn Regression
+	reg = LinearRegression(fit_intercept=True, normalize=False, copy_X=True).fit(train_data[:,:-1], train_data[:,-1])
+	Ypred = reg.predict(test_data[:,:-1])
 	if isRegress:
-		reg = LinearRegression(fit_intercept=True, normalize=False, copy_X=True).fit(train_data[:,:-1], train_data[:,-1])
-		Ypred = reg.predict(test_data[:,:-1])
 		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
 		print("Linear model rms (Scikit-learn) "+str(rms))
-
+	if not isRegress:
+		Ypred = (Ypred > 0.5).astype(np.int)
+		acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+		print("Linear model Accuracy "+str(acc))
 
 	# Our implementation
 	linear_model = linearLogisticModels.LinearModels(maxDegree,isRegularized,lambd)
@@ -192,21 +198,61 @@ def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , 
 	return Ytrue,Ypred
 
 def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd ):
+	train_data = inputDataClass.Train
+	test_data = inputDataClass.Test
+	Ytrue = test_data[:,-1]
 	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold, isRegularized, lambd)
-	logistic_model.train(inputDataClass.Train)
-	Ytrue = inputDataClass.Test[:,-1]
-	Ypred = logistic_model.test(inputDataClass.Test[:,:-1])
+	logistic_model.train(train_data)
+
+	# Scikit Learn
+	clf = LogisticRegression().fit(train_data[:,:-1], train_data[:,-1])
+	Ypred = clf.predict(test_data[:, :-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
+
+	# Our implementation
+	Ypred = logistic_model.test(test_data[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
-def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, isRegularized , lambd ):
-	multi_class_logistic_model = linearLogisticModels.MultiClassLogistic(maxDegree,learnRate,isRegularized,lambd)
-	multi_class_logistic_model.train(inputDataClass.Train)
-	Ytrue = inputDataClass.Test[:,-1]
+def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, isRegularized , lambd ):
+	train_data = inputDataClass.Train
+	test_data = inputDataClass.Test
+	Ytrue = test_data[:,-1]
+	multi_class_logistic_model = linearLogisticModels.MultiClassLogistic(maxDegree,learnRate, GDthreshold,isRegularized,lambd)
+	multi_class_logistic_model.train(train_data)
+
+	clf = LogisticRegression(solver='lbfgs',multi_class='multinomial').fit(train_data[:,:-1], train_data[:,-1])
+	Ypred = clf.predict(test_data[:, :-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
+
+	#Our implementation
 	Ypred = multi_class_logistic_model.test(inputDataClass.Test[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Multi Class Logistic model Accuracy "+str(acc))
+	return Ytrue,Ypred
+
+def performPerceptron(inputDataClass,numIter, isBinary):
+	train_data = inputDataClass.Train
+	test_data = inputDataClass.Test
+	Ytrue = test_data[:,-1]
+
+	clf = Perceptron().fit(train_data[:,:-1], train_data[:,-1])
+	Ypred = clf.predict(test_data[:, :-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Perceptron model Accuracy (Scikit-learn) "+str(acc))
+
+	# Our perceptron
+	if isBinary:
+		percept = perceptron.percep_2(train_data[:,:-1],train_data[:,-1],test_data[:,:-1])
+	else:
+		percept = perceptron.multi_perceptron(train_data[:,:-1],train_data[:,-1],test_data[:,:-1])
+	percept.process(numIter)
+	Ypred = percept.ypred()
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Perceptron model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
 
@@ -266,13 +312,15 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
 
 	"""################################# Linear Models #############################################"""
-	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
+	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = False, lambd = 1, isRegress = True)
 	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
 
 	"""################################# Logistic Models #############################################"""
 	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = False, lambd = 0.001)
-	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
+	# Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 0.01)
 
+	"""################################# Perceptron #############################################"""
+	Ytrue,Ypred = performPerceptron(inputDataClass = inputDataClass, numIter = 1000, isBinary = False)
 
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###

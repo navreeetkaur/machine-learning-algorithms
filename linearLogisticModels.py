@@ -101,30 +101,30 @@ class MultiClassLinear:
 		return W.transpose()
 
 
-	def performGradientDescent(self,theta,X,Y):
-		for k in range(1):
-			print(k)
-			# print(X.shape[0])
-			for i in range(X.shape[0]):
-				z=0
-				for j in range(theta.shape[0]):
-					z+= X[i].dot(theta[j])
-				# print(z)
-				if z==0:
-					print("z=0 at i "+str(i))
-					print(X[i])
-					print(theta)
-					exit()
+	# def performGradientDescent(self,theta,X,Y):
+	# 	for k in range(1):
+	# 		print(k)
+	# 		# print(X.shape[0])
+	# 		for i in range(X.shape[0]):
+	# 			z=0
+	# 			for j in range(theta.shape[0]):
+	# 				z+= X[i].dot(theta[j])
+	# 			# print(z)
+	# 			if z==0:
+	# 				print("z=0 at i "+str(i))
+	# 				print(X[i])
+	# 				print(theta)
+	# 				exit()
 
-				for j in range(theta.shape[0]):
-					if self.isRegularized:
-						theta[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
-					else:
-						theta[j] = theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
-				# print(theta)
+	# 			for j in range(theta.shape[0]):
+	# 				if self.isRegularized:
+	# 					theta[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
+	# 				else:
+	# 					theta[j] = theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
+	# 			# print(theta)
 				
-		print(theta)
-		return theta
+	# 	print(theta)
+	# 	return theta
 
 	def test(self,test_data):
 		Ypred = np.zeros(test_data.shape[0])
@@ -184,12 +184,13 @@ class LogisticModels:
 
 class MultiClassLogistic:
 	
-	def __init__(self,maxDegree, learnRate,isRegularized, lambd):
+	def __init__(self,maxDegree, learnRate, GDthreshold,isRegularized, lambd):
 		self.learnRate = learnRate
 		self.maxDegree = maxDegree
 		self.parameters = []
 		self.isRegularized = isRegularized
 		self.lambd = lambd
+		self.GDthreshold = GDthreshold
 
 	def train(self,train_data):
 		phiX = calcPhiX(train_data[:,:-1],self.maxDegree)
@@ -203,21 +204,25 @@ class MultiClassLogistic:
 		self.parameters = self.performGradientDescent(parameters,phiX,yOneShot)
 
 	def performGradientDescent(self,theta,X,Y):
+		thetaNew = np.copy(theta)
 		while True:
 			# print(X.shape[0])
 			for i in range(X.shape[0]):
 				z=0
-				for j in range(theta.shape[0]):
-					z+= np.exp(X[i].dot(theta[j]))
+				for j in range(thetaNew.shape[0]):
+					z+= np.exp(X[i].dot(thetaNew[j]))
 
-				for j in range(theta.shape[0]):
+				for j in range(thetaNew.shape[0]):
 					if self.isRegularized:
-						theta[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*theta[j] + self.learnRate* (Y[i][j] - (theta[j].dot(X[i]))/z)*X[i]/z
+						thetaNew[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*thetaNew[j] + self.learnRate* (Y[i][j] - (thetaNew[j].dot(X[i]))/z)*X[i]/z
 					else:
-						theta[j] = theta[j] + self.learnRate* (Y[i][j] - np.exp(theta[j].dot(X[i]))/z)*np.exp(theta[j].dot(X[i]))*X[i]/z
-				
-		print(theta)
-		return theta
+						thetaNew[j] = thetaNew[j] + self.learnRate* (Y[i][j] - np.exp(thetaNew[j].dot(X[i]))/z)*np.exp(thetaNew[j].dot(X[i]))*X[i]/z
+
+			if np.max(np.absolute(thetaNew-theta)) < self.GDthreshold:
+				return thetaNew
+			else:
+				theta = thetaNew
+
 
 	def test(self,test_data):
 		Ypred = np.zeros(test_data.shape[0])
