@@ -4,6 +4,7 @@ import sys
 from sklearn.naive_bayes import GaussianNB
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.linear_model import LinearRegression
 
 import inputReader
 import Bayes
@@ -154,17 +155,32 @@ def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)
 	return Ytrue,Ypred
 
 def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegress = False):
+	train_data = inputDataClass.Train
+	test_data = inputDataClass.Test
+	Ytrue = test_data[:,-1]
+
+	# Scikit-learn Regression
+	if isRegress:
+		reg = LinearRegression(fit_intercept=True, normalize=False, copy_X=True).fit(train_data[:,:-1], train_data[:,-1])
+		Ypred = reg.predict(test_data[:,:-1])
+		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
+		print("Linear model rms (Scikit-learn) "+str(rms))
+
+
+	# Our implementation
 	linear_model = linearLogisticModels.LinearModels(maxDegree,isRegularized,lambd)
-	linear_model.train(inputDataClass.Train)
-	Ypred = linear_model.test(inputDataClass.Test[:,:-1], isRegress)
-	Ytrue = inputDataClass.Test[:,-1]
+	linear_model.train(train_data)
+	Ypred = linear_model.test(test_data[:,:-1], isRegress)
+	
 	if isRegress:
 		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
 		print("Linear model rms "+str(rms))
 	if not isRegress:
 		acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 		print("Linear model Accuracy "+str(acc))
+	
 	return Ytrue,Ypred
+
 
 def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , lambd ):
 	multi_class_linear_model = linearLogisticModels.MultiClassLinear(maxDegree,learnRate,isRegularized,lambd)
@@ -175,13 +191,22 @@ def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , 
 	print("Multi Class Linear model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
-def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold ):
-	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold)
+def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd ):
+	logistic_model = linearLogisticModels.LogisticModels(maxDegree,learnRate,GDthreshold, isRegularized, lambd)
 	logistic_model.train(inputDataClass.Train)
 	Ytrue = inputDataClass.Test[:,-1]
-	Ypred = multi_class_linear_model.test(inputDataClass.Test[:,:-1])
+	Ypred = logistic_model.test(inputDataClass.Test[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy "+str(acc))
+	return Ytrue,Ypred
+
+def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, isRegularized , lambd ):
+	multi_class_logistic_model = linearLogisticModels.MultiClassLogistic(maxDegree,learnRate,isRegularized,lambd)
+	multi_class_logistic_model.train(inputDataClass.Train)
+	Ytrue = inputDataClass.Test[:,-1]
+	Ypred = multi_class_logistic_model.test(inputDataClass.Test[:,:-1])
+	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
+	print("Multi Class Logistic model Accuracy "+str(acc))
 	return Ytrue,Ypred
 
 
@@ -244,8 +269,10 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = False, lambd = 1, isRegress = False)
 	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
 
-	"""################################# Logisitic Models #############################################"""
-	Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.01)
+	"""################################# Logistic Models #############################################"""
+	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = False, lambd = 0.001)
+	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, isRegularized = True, lambd = 0.01)
+
 
 	"""################################# KMEANS #############################################"""
 	# k = 3					### Hyperparameter ###
