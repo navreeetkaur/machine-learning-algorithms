@@ -1,7 +1,7 @@
 # classifiers-ell409
 
 This project consists of the tasks of building up different kinds of classifiers on various example datasets. 
-PFA : Detailed report for data analysis on FMNIST, Railway Data, Health Data and RIver Data.
+PFA : Detailed report for data analysis on FMNIST, Railway Data, Health Data and River Data.
 
 We have implemented following types of Classification schemes for each problem
 
