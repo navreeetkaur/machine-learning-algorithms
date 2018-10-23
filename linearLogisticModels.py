@@ -155,6 +155,7 @@ class LogisticModels:
 		self.W = self.calcW(phiX,Y)
 
 	def calcW(self,phiX,Y):
+		# print(self.learnRate)
 		W = np.random.rand(phiX.shape[1])
 		while True:
 			# print(W)

@@ -46,10 +46,10 @@ class percep_2:
 		return b
 
 class multi_perceptron:
-	def __init__(self,input_data,labels,num_classes,test_data):
+	def __init__(self,input_data,labels,test_data):
 		self.input_data = input_data
 		self.labels = labels
-		self.num_classes = num_classes
+		self.num_classes = len(np.unique(labels))
 		a = len(input_data[0])
 		self.weights = np.zeros((num_classes,a))
 		self.test_data = test_data

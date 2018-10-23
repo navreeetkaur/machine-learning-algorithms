@@ -8,6 +8,19 @@ from cycler import cycler
 
 sns.set(color_codes=True)
 
+def visualizeDataRegression(X,Y,W):
+	plt.title("Regression Line")
+	plt.scatter(X,Y)
+	abline(W[0],W[1])
+	plt.show()
+
+def abline(slope, intercept):
+    """Plot a line from slope and intercept"""
+    axes = plt.gca()
+    x_vals = np.array(axes.get_xlim())
+    y_vals = intercept + slope * x_vals
+    plt.plot(x_vals, y_vals, '-',color='r')
+
 def visualiseCCD(X,c,i):
 	# print(X.shape)
 	# X = X.astype(np.float64)

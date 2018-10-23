@@ -157,7 +157,7 @@ def performKNN(inputDataClass, nearestNeighbours,mode,label_with_distance=False)
 	print("Testing Accuracy = "+str(performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)))
 	return Ytrue,Ypred
 
-def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegress = False):
+def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegress = False, drawConfusion = False, drawScatter = False):
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
@@ -181,30 +181,42 @@ def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegre
 	if isRegress:
 		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
 		print("Linear model rms "+str(rms))
+		if drawScatter:
+			Visualization.visualizeDataRegression(train_data[:,:-1],train_data[:,-1],linear_model.W)
+
 	if not isRegress:
 		acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 		print("Linear model Accuracy "+str(acc))
+
+	if drawConfusion:
+		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+		Visualization.visualizeConfusion(confusion)
 	
 	return Ytrue,Ypred
 
 
-def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , lambd ):
+def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , lambd , drawConfusion = False):
 	multi_class_linear_model = linearLogisticModels.MultiClassLinear(maxDegree,learnRate,isRegularized,lambd)
 	multi_class_linear_model.train(inputDataClass.Train)
 	Ytrue = inputDataClass.Test[:,-1]
 	Ypred = multi_class_linear_model.test(inputDataClass.Test[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Multi Class Linear model Accuracy "+str(acc))
+	if drawConfusion:
+		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+		Visualization.visualizeConfusion(confusion)
 	return Ytrue,Ypred
 
-def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd ):
+def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd , drawConfusion = False):
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
 
 	# Scikit Learn
-	clf = LogisticRegression().fit(train_data[:,:-1], train_data[:,-1])
-	Ypred = clf.predict(test_data[:, :-1])
+	phiX = linearLogisticModels.calcPhiX(train_data[:,:-1],maxDegree)
+	clf = LogisticRegression().fit(phiX, train_data[:,-1])
+	phiXTest = linearLogisticModels.calcPhiX(test_data[:,:-1],maxDegree)
+	Ypred = clf.predict(phiXTest)
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
 
@@ -214,15 +226,20 @@ def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,is
 	Ypred = logistic_model.test(test_data[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy "+str(acc))
+	if drawConfusion:
+		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+		Visualization.visualizeConfusion(confusion)
 	return Ytrue,Ypred
 
-def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, isRegularized , lambd ):
+def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, isRegularized , lambd , drawConfusion = False):
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
 
-	clf = LogisticRegression(solver='lbfgs',multi_class='multinomial').fit(train_data[:,:-1], train_data[:,-1])
-	Ypred = clf.predict(test_data[:, :-1])
+	phiX = linearLogisticModels.calcPhiX(train_data[:,:-1],maxDegree)
+	clf = LogisticRegression(solver='lbfgs',multi_class='multinomial').fit(phiX, train_data[:,-1])
+	phiXTest = linearLogisticModels.calcPhiX(test_data[:,:-1],maxDegree)
+	Ypred = clf.predict(phiXTest)
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Logistic model Accuracy (Scikit-learn) "+str(acc))
 
@@ -232,6 +249,9 @@ def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, i
 	Ypred = multi_class_logistic_model.test(inputDataClass.Test[:,:-1])
 	acc = performanceAnalyser.calcAccuracyTotal(Ypred,Ytrue)
 	print("Multi Class Logistic model Accuracy "+str(acc))
+	if drawConfusion:
+		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
+		Visualization.visualizeConfusion(confusion)
 	return Ytrue,Ypred
 
 def performPerceptron(inputDataClass,numIter, isBinary):
@@ -312,12 +332,12 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
 
 	"""################################# Linear Models #############################################"""
-	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = True, lambd = 0.1, isRegress = False)
-	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = i, learnRate = 0.01, isRegularized = True, lambd = 10**j)
+	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = True, lambd = 0.001, isRegress = False, drawConfusion = False, drawScatter = False)
+	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 4, learnRate = 0.01, isRegularized = True, lambd = 1, drawConfusion = False)
 
 	"""################################# Logistic Models #############################################"""
-	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = i, learnRate = 0.001, GDthreshold = 0.01, isRegularized = True, lambd = 10**j)
-	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 0.01)
+	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = True, lambd = 0.01 , drawConfusion = True)
+	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 1, drawConfusion = True)
 
 	"""################################# Perceptron #############################################"""
 	# Ytrue,Ypred = performPerceptron(inputDataClass = inputDataClass, numIter = 1000, isBinary = False)
