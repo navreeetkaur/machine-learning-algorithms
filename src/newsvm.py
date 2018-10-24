@@ -3,8 +3,8 @@ from cvxopt import matrix
 from cvxopt import solvers
 
 import scipy 
-from inputReader import InputReader 
-import performanceAnalyser
+from src.inputReader import InputReader 
+import src.performanceAnalyser as performanceAnalyser
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pylab as pl

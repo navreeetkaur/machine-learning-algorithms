@@ -1,6 +1,6 @@
 import numpy as np
 import math
-import Visualization
+import src.Visualization as Visualization
 
 def calcRootMeanSquareRegression(Ypred,Ytrue):
 	diff = Ytrue-Ypred

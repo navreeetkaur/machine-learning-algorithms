@@ -3,7 +3,7 @@ import math
 import operator
 import sys
 
-import Distributions
+import src.Distributions as Distributions
 
 
 # global var for distributions

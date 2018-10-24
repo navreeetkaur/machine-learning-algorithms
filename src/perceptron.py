@@ -1,7 +1,7 @@
-import inputReader
-import performanceAnalyser
+import src.inputReader as inputReader
+import src.performanceAnalyser as performanceAnalyser
 import numpy as np
-import Visualization
+import src.Visualization as Visualization
 
 
 class percep_2:

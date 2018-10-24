@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import sys,os
 
 from sklearn.naive_bayes import GaussianNB
 from sklearn.cluster import KMeans
@@ -8,16 +8,16 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Perceptron
 
-import inputReader
-import Bayes
-import performanceAnalyser
-import Preprocessing
-import kmeans
-import KNN
-import Visualization
-import ROC
-import linearLogisticModels
-import perceptron
+import src.inputReader as inputReader
+import src.Bayes as Bayes
+import src.performanceAnalyser as performanceAnalyser
+import src.Preprocessing as Preprocessing
+import src.kmeans as kmeans
+import src.KNN as KNN
+import src.Visualization as Visualization
+import src.ROC as ROC
+import src.linearLogisticModels as linearLogisticModels
+import src.perceptron as perceptron
 
 dists = {-1: "Ignore",0:"Gaussian", 1:"Multinomail"}
 
@@ -181,6 +181,8 @@ def performLinearModels(inputDataClass, maxDegree, isRegularized, lambd, isRegre
 	if isRegress:
 		rms = performanceAnalyser.calcRootMeanSquareRegression(Ypred,Ytrue)
 		print("Linear model rms "+str(rms))
+		r2Score = performanceAnalyser.R2(Ypred,Ytrue)
+		print("Linear model R2 Score "+str(r2Score))
 		if drawScatter:
 			Visualization.visualizeDataRegression(train_data[:,:-1],train_data[:,-1],linear_model.W)
 
@@ -207,7 +209,7 @@ def performMultiClassLinear(inputDataClass,maxDegree,learnRate, isRegularized , 
 		Visualization.visualizeConfusion(confusion)
 	return Ytrue,Ypred
 
-def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd , drawConfusion = False):
+def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,isRegularized , lambd , drawConfusion = False, drawLikelihood = False):
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
@@ -229,9 +231,11 @@ def performLogisticModels(inputDataClass, maxDegree , learnRate , GDthreshold,is
 	if drawConfusion:
 		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
 		Visualization.visualizeConfusion(confusion)
+	if drawLikelihood:
+		Visualization.visualizeLikelihoodvsIteration(logistic_model.likelihood)
 	return Ytrue,Ypred
 
-def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, isRegularized , lambd , drawConfusion = False):
+def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, isRegularized , lambd , drawConfusion = False, drawSquaredLoss = False):
 	train_data = inputDataClass.Train
 	test_data = inputDataClass.Test
 	Ytrue = test_data[:,-1]
@@ -252,6 +256,8 @@ def performMultiClassLogistic(inputDataClass,maxDegree,learnRate, GDthreshold, i
 	if drawConfusion:
 		confusion = performanceAnalyser.getConfusionMatrix(Ytrue,Ypred)
 		Visualization.visualizeConfusion(confusion)
+	if drawSquaredLoss:
+		Visualization.visualizeLossvsIteration(multi_class_logistic_model.squaredLoss)
 	return Ytrue,Ypred
 
 def performPerceptron(inputDataClass,numIter, isBinary):
@@ -280,30 +286,32 @@ if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		print("Invalid Format. Provide input file names")
 		exit()
-	inputDataFile = sys.argv[1]
+	inputDataFilePath = sys.argv[1]
 	
 	mode = -1		# 0 for Medical; 1 for Fashion; 2 for Railway; 3 for river data
 
 	mod_dict = {0:'Medical_data', 1:'fashion-mnist', 2:'railway_Booking', 3:'River Data'}
 
+	inputDataFile = os.path.basename(inputDataFilePath)
+
 	if inputDataFile == 'Medical_data.csv':
 		mode = 0
 		x= []
-		x.append(inputDataFile)
+		x.append(inputDataFilePath)
 		if len(sys.argv) != 3:
 			print('Enter both train and test files')
 			exit()
 		x.append(sys.argv[2])
-		inputDataFile = x
+		inputDataFilePath = x
 	elif inputDataFile == 'fashion-mnist_train.csv':
 		mode = 1
 		x= []
-		x.append(inputDataFile)
+		x.append(inputDataFilePath)
 		if len(sys.argv) != 3:
 			print('Enter both train and test files')
 			exit()
 		x.append(sys.argv[2])
-		inputDataFile = x
+		inputDataFilePath = x
 	elif inputDataFile == 'railwayBookingList.csv':
 		mode = 2
 	elif inputDataFile == 'river_data.csv':
@@ -315,7 +323,7 @@ if __name__ == '__main__':
 
 
 	train_test_ratio = 0.8
-	inputDataClass = inputReader.InputReader(inputDataFile,mode,train_test_ratio = train_test_ratio)
+	inputDataClass = inputReader.InputReader(inputDataFilePath,mode,train_test_ratio = train_test_ratio)
 
 	if mode == 1:
 		"""################################# PCA #############################################"""
@@ -332,12 +340,12 @@ if __name__ == '__main__':
 	# Ytrue,Ypred = performBayes(inputDataClass = inputDataClass, drawPrecisionRecall = False, drawConfusion = False)
 
 	"""################################# Linear Models #############################################"""
-	# Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=1, isRegularized = True, lambd = 0.001, isRegress = False, drawConfusion = False, drawScatter = False)
-	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 4, learnRate = 0.01, isRegularized = True, lambd = 1, drawConfusion = False)
+	Ytrue,Ypred = performLinearModels(inputDataClass = inputDataClass, maxDegree=4, isRegularized = True, lambd = 0.001, isRegress = True, drawConfusion = False, drawScatter = False)
+	# Ytrue,Ypred = performMultiClassLinear(inputDataClass = inputDataClass, maxDegree = 4, learnRate = 0.01, isRegularized = True, lambd = 10, drawConfusion = False)
 
 	"""################################# Logistic Models #############################################"""
-	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = True, lambd = 0.01 , drawConfusion = True)
-	Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 1, drawConfusion = True)
+	# Ytrue,Ypred = performLogisticModels(inputDataClass = inputDataClass, maxDegree = 1, learnRate = 0.001, GDthreshold = 0.01, isRegularized = True, lambd = 0.01 , drawConfusion = True, drawLikelihood = False)
+	# Ytrue,Ypred = performMultiClassLogistic(inputDataClass = inputDataClass, maxDegree = 3, learnRate = 0.01, GDthreshold = 0.001,isRegularized = False, lambd = 1, drawConfusion = True, drawSquaredLoss = True)
 
 	"""################################# Perceptron #############################################"""
 	# Ytrue,Ypred = performPerceptron(inputDataClass = inputDataClass, numIter = 1000, isBinary = False)

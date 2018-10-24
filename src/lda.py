@@ -4,8 +4,8 @@ import math
 import numpy as np 
 import pandas as pd
 from scipy.linalg import eigh
-from inputReader import InputReader 
-import performanceAnalyser
+from src.inputReader import InputReader 
+import src.performanceAnalyser as performanceAnalyser
 
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -15,7 +15,7 @@ import matplotlib.cm as mplcm
 import matplotlib.colors as colors
 import scipy.misc
 
-from Distributions import gaussian_multivar
+from src.Distributions import gaussian_multivar
 
 # distance measure
 def distance(mode, data1, data2):

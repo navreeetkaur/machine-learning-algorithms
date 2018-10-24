@@ -23,7 +23,7 @@ class InputReader:
 
 		for k in range(len(inputDataFileList)):
 			file = inputDataFileList[k]
-			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
+			with open(file,'r') as inputFile:
 				lines = inputFile.readlines()
 				lines = lines[1:]
 				num_records= len(lines)
@@ -58,7 +58,7 @@ class InputReader:
 
 		for k in range(len(inputDataFileList)):
 			file = inputDataFileList[k]
-			with open(str(self.dataset_folder+'/'+ file),'r') as inputFile:
+			with open(file,'r') as inputFile:
 				lines = inputFile.readlines()
 				lines = lines[1:]
 				num_records= len(lines)
@@ -76,7 +76,7 @@ class InputReader:
 
 
 	def collectInputRailway(self,inputDataFileList):
-		with open(str(self.dataset_folder+'/'+ inputDataFileList),'r') as inputFile:
+		with open(inputDataFileList,'r') as inputFile:
 			lines = inputFile.readlines()
 			lines = lines[1:]
 			labels = ['caseID','budget','memberCount','preferredClass','sex','age','ifBoarded']
@@ -86,6 +86,7 @@ class InputReader:
 			num_test = num_records - num_train
 			test_array = np.zeros((num_test,num_labels),dtype= np.int64)
 			train_array = np.zeros((num_train,num_labels),dtype=np.int64)
+			np.random.seed(0)
 			test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
 
 			i=0
@@ -195,7 +196,7 @@ class InputReader:
 		return train_array,test_array,labels	
 
 	def collectInputRiver(self,inputDataFileList):
-		with open(str(self.dataset_folder+'/'+ inputDataFileList),'r') as inputFile:
+		with open(inputDataFileList,'r') as inputFile:
 			lines = inputFile.readlines()
 			lines = lines[1:]
 			labels = ['x','Levels']
@@ -205,6 +206,7 @@ class InputReader:
 			num_test = num_records - num_train
 			test_array = np.zeros((num_test,num_labels),dtype= np.float64)
 			train_array = np.zeros((num_train,num_labels),dtype=np.float64)
+			np.random.seed(0)
 			test_indices = np.sort(np.random.choice(num_records-1,num_test,replace=False))
 
 			i=0

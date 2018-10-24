@@ -3,10 +3,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import Preprocessing
+import src.Preprocessing as Preprocessing
 from cycler import cycler
 
 sns.set(color_codes=True)
+
+def visualizeLikelihoodvsIteration(ll):
+	plt.title("Log Likelihood vs Number of iterations")
+	x_vals = [i for i in range(len(ll))]
+	plt.plot(x_vals, ll, '-',color='b')
+	plt.show()
+
+def visualizeLossvsIteration(ll):
+	plt.title("Squared Error Loss vs Number of iterations")
+	x_vals = [i for i in range(len(ll))]
+	plt.plot(x_vals, ll, '-',color='b')
+	plt.show()
 
 def visualizeDataRegression(X,Y,W):
 	plt.title("Regression Line")

@@ -1,6 +1,6 @@
-import inputReader
-import performanceAnalyser
-import Visualization
+import src.inputReader as inputReader
+import src.performanceAnalyser as performanceAnalyser
+import src.Visualization as Visualization
 import math
 
 import numpy as np 
@@ -147,6 +147,7 @@ class LogisticModels:
 		self.GDthreshold = GDthreshold
 		self.isRegularized = isRegularized
 		self.lambd = lambd
+		self.likelihood = []
 
 	def train(self,train_data):
 		X = train_data[:,:-1]
@@ -170,10 +171,18 @@ class LogisticModels:
 			else:
 				correction = self.learnRate*z
 			W = W -correction
+
+			self.likelihood.append(self.calcLikelihood(W,phiX,Y))
 			maxx = math.fabs(np.max(correction))
 			# print(maxx)
 			if  maxx < self.GDthreshold:
 				return W
+
+	def calcLikelihood(self,W,X,Y):
+		ll = 0
+		for i in range(X.shape[0]):
+			ll+= -1* W.dot(X[i]) - np.log(1+np.exp(-1*W.dot(X[i])))
+		return ll
 
 	def test(self,test_data):
 		X = test_data
@@ -195,6 +204,7 @@ class MultiClassLogistic:
 		self.isRegularized = isRegularized
 		self.lambd = lambd
 		self.GDthreshold = GDthreshold
+		self.squaredLoss = []
 
 	def train(self,train_data):
 		phiX = calcPhiX(train_data[:,:-1],self.maxDegree)
@@ -221,12 +231,23 @@ class MultiClassLogistic:
 						thetaNew[j] = (1-self.learnRate*(self.lambd/X.shape[0]))*thetaNew[j] + self.learnRate* (Y[i][j] - (thetaNew[j].dot(X[i]))/z)*X[i]/z
 					else:
 						thetaNew[j] = thetaNew[j] + self.learnRate* (Y[i][j] - np.exp(thetaNew[j].dot(X[i]))/z)*np.exp(thetaNew[j].dot(X[i]))*X[i]/z
+				# self.squaredLoss.append(self.calcLoss(thetaNew,X,Y))
+
 
 			if np.max(np.absolute(thetaNew-theta)) < self.GDthreshold:
 				return thetaNew
 			else:
 				theta = thetaNew
 
+	def calcLoss(self,theta,X,Y):
+		loss = 0
+		for i in range(X.shape[0]):
+			sum = 0
+			for j in range(Y.shape[1]):
+				sum+=theta[j].dot(X[i])
+			for j in range(Y.shape[1]):
+				loss += (Y[i][j] - np.exp(theta[j].dot(X[i]))/sum)**2
+		return np.log10(loss)
 
 	def test(self,test_data):
 		Ypred = np.zeros(test_data.shape[0])
