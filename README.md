@@ -1,4 +1,6 @@
-# classifiers-ell409
+# Machine Learning Algorithms
+
+### These implementations were done as part of assignments of the Machine Learning course ELL409(2018-19) @ IIT Delhi
 
 This project consists of the tasks of building up different kinds of classifiers on various example datasets. 
 PFA : Detailed report for data analysis on FMNIST, Railway Data, Health Data and River Data.
